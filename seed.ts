@@ -1,9 +1,18 @@
 import { PrismaClient } from "@prisma/client";
 
+
 const prisma = new PrismaClient();
 
-async function main() {
+try {
+  
+
+  // console.log("Start seeding in main");
   // Users
+  console.log("Deleting Users");
+  
+  await prisma.user.deleteMany()
+
+  console.log("Deleted Users");
   const user1 = await prisma.user.create({
     data: {
       email: "user1@example.com",
@@ -16,6 +25,9 @@ async function main() {
       },
     },
   });
+ 
+  console.log(user1);
+  
 
   const user2 = await prisma.user.create({
     data: {
@@ -206,13 +218,9 @@ async function main() {
   });
 
   console.log("Seed-Daten erfolgreich eingefügt");
+} catch (error) {
+  console.error(e);
+} finally {
+  await prisma.$disconnect();
+  process.exit(0);
 }
-
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });

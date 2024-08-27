@@ -69,7 +69,7 @@ const formSchema = z.object({
 
 export default function ReportForm() {
 	const [issue, setIssue] = useState<string>("");
-	const [details, setDetails] = useState<string>("");
+	// const [details, setDetails] = useState<string>("");
 	const [isOpen, setIsOpen] = useState(false);
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -109,6 +109,7 @@ export default function ReportForm() {
 	// 		alert("Failed to submit the report.");
 	// 	}
 	// };
+
 	// Handling form submission
 	async function onSubmit(data: z.infer<typeof formSchema>) {
 		console.log("SUBMITTED", data);
@@ -128,7 +129,6 @@ export default function ReportForm() {
 						<FormItem>
 							<FormLabel>What is Wrong with the Venue?</FormLabel>
 							<FormControl className='flex flex-col m-3 text-sm gap-7'>
-								{/* <p className='font-semibold'>What is wrong with this venue?</p> */}
 								<Select onValueChange={(value) => setIssue(value)}>
 									<SelectTrigger>
 										<SelectValue placeholder='Choose an issue' />
@@ -206,7 +206,7 @@ export default function ReportForm() {
 								<Textarea
 									placeholder='Do you have any details to report?'
 									{...field}
-									className='w-[270px]'
+									className=' w-full'
 								/>
 							</FormControl>
 							<FormMessage />

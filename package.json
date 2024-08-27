@@ -71,6 +71,6 @@
   "module": "index.ts",
   "type": "module",
   "prisma": {
-    "seed": "bun seed.ts"
+    "seed": "bun ./seed.ts"
   }
 }
