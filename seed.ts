@@ -67,29 +67,63 @@ async function main() {
       requiredNumberOfParticipants: 1,
     },
   });
+  const boule = await prisma.activityType.create({
+    data: {
+      name: "Boule",
+      description: "Tossing metal balls and drinking pastis",
+      requiredNumberOfParticipants: 2,
+    },
+  });
 
   // Venues
   const weisseElster = await prisma.venue.create({
     data: {
       name: "Weisse Elster",
-      location: "Clara Park",
+      location: "52.4926, 13.466",
       image: "/elster.jpg",
+      activityTypes: {
+        connect: {
+          id: tennis.id,
+        },
+      },
     },
   });
 
   const musselGym = await prisma.venue.create({
     data: {
       name: "Mussel Gym",
-      location: "Zschochersche Str",
+      location: "52.5002, 13.4752",
       image: "/mussel.jpg",
+      activityTypes: {
+        connect: {
+          id: yoga.id,
+        },
+      },
     },
   });
 
   const beachClubCossi = await prisma.venue.create({
     data: {
       name: "Beach Club Cossi",
-      location: "Cospudener See",
+      location: "52.5031, 13.4763",
       image: "/cossi.jpg",
+      activityTypes: {
+        connect: {
+          id: basketball.id,
+        },
+      },
+    },
+  });
+  const bouleBahnBerlin = await prisma.venue.create({
+    data: {
+      name: "Boule Bahn Berlin",
+      location: "52.511, 13.4637",
+      image: "/example.png",
+      activityTypes: {
+        connect: {
+          id: boule.id,
+        },
+      },
     },
   });
 
@@ -101,7 +135,7 @@ async function main() {
   // Meets (including one tournament)
   await prisma.meet.create({
     data: {
-      date: new Date("2024-09-15"),
+      date: new Date("2024-08-29"),
       time: "14:00",
       duration: 2,
       isPublic: false,
@@ -112,6 +146,7 @@ async function main() {
       tags: { connect: [{ name: "Outdoor" }] },
       venueId: weisseElster.id,
       activityTypeId: basketball.id,
+      competitive: true,
     },
   });
 
@@ -127,6 +162,34 @@ async function main() {
       tags: { connect: [{ name: "Outdoor" }] },
       venueId: beachClubCossi.id,
       activityTypeId: tennis.id,
+    },
+  });
+  await prisma.meet.create({
+    data: {
+      date: new Date("2024-09-20"),
+      time: "10:00",
+      duration: 3,
+      isPublic: false,
+      creatorId: user2.id,
+      participants: { connect: [{ id: user1.id }, { id: user2.id }] },
+      notes: "juhu boule",
+      tags: { connect: [{ name: "Outdoor" }] },
+      venueId: bouleBahnBerlin.id,
+      activityTypeId: boule.id,
+    },
+  });
+  await prisma.meet.create({
+    data: {
+      date: new Date("2024-09-20"),
+      time: "10:00",
+      duration: 1,
+      isPublic: true,
+      creatorId: user2.id,
+      participants: { connect: [{ id: user1.id }] },
+      notes: "ballin",
+      tags: { connect: [{ name: "Outdoor" }] },
+      venueId: musselGym.id,
+      activityTypeId: basketball.id,
     },
   });
 

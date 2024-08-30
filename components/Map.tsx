@@ -1,23 +1,29 @@
 "use client";
 import { LatLngExpression, divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { ReactNode, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { MapContainer, Marker, TileLayer } from "react-leaflet";
-import data from "@/lib/output_data.json";
 import { VenuePin } from "./VenuePin";
 import ReactDOMServer from "react-dom/server";
+import { GetVenuesResult } from "@/app/api/data-access/venues";
 
 // Define the structure of each entry in the data
-interface DataEntry {
-  geolocation: number[] | null[];
-  state?: "intended" | "playing" | "free"; // Optional state property
-}
+// interface DataEntry {
+//   geolocation: number[] | null[];
+//   state?: "intended" | "playing" | "free"; // Optional state property
+// }
 
-interface MapProps {
-  children: ReactNode;
+function parseLocation(locationString: string): [number, number] {
+  const [lat, lng] = locationString.split(",").map(Number);
+  return [lat || 0, lng || 0];
 }
+const state = "intended";
 
-export function Map({ children }: MapProps) {
+type MapProps = {
+  venues: GetVenuesResult; // or whatever type your venues array is
+};
+
+export function Map({ venues }: MapProps) {
   const [location, setLocation] = useState<LatLngExpression | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -32,7 +38,7 @@ export function Map({ children }: MapProps) {
         },
         (error) => {
           console.error("Error getting User location", error);
-          setLocation([51.3397, 12.3731]); // Default location
+          setLocation([52.4926, 13.466]); // Default location
           setLoading(false);
         }
       );
@@ -61,25 +67,21 @@ export function Map({ children }: MapProps) {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
-          {data.map((entry: DataEntry, index: number) => (
+          {venues.map((venue) => (
             <Marker
-              key={index}
-              position={[
-                entry.geolocation[0] === null ? 0 : entry.geolocation[0],
-                entry.geolocation[1] === null ? 0 : entry.geolocation[1],
-              ]}
+              key={venue.id}
+              position={parseLocation(venue.location)}
               icon={divIcon({
                 className: "custom-icon",
                 html: ReactDOMServer.renderToString(
-                  <VenuePin state={entry.state} /> // If `state` is undefined, VenuePin defaults to white
-                ),
+                  <VenuePin state={state} /> // If `state` is undefined, VenuePin defaults to white
+                ), // This has to come from meet and maybe tournament, but that's for later
                 iconSize: [24, 24], // Size of your icon
                 iconAnchor: [12, 24], // Point of the icon which will correspond to marker's location
               })}
             />
           ))}
         </MapContainer>
-        <div className="absolute top-4 right-4 z-[1000]">{children}</div>
       </div>
     );
   } else {
