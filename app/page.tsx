@@ -135,13 +135,9 @@ export default async function Home({
   const filteredVenues = filterVenues(venues, filters);
   return (
     <div className="h-screen w-full">
-      <Map venues={filteredVenues} />
-      <DrawerHomepage />
-      <div className="absolute top-4 right-4 z-[1000]">
-        {" "}
+      <Map>
         <FilterDrawer />
-      </div>
-
+      </Map>
       <Navbar />
     </div>
   );

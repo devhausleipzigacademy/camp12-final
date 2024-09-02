@@ -1,7 +1,7 @@
 "use client";
 import { LatLngExpression, divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { MapContainer, Marker, TileLayer } from "react-leaflet";
 import { VenuePin } from "./VenuePin";
 import ReactDOMServer from "react-dom/server";
@@ -55,6 +55,17 @@ export function Map({ venues }: MapProps) {
 
   if (typeof window !== "undefined" && location !== null && loading === false) {
     return (
+      <div>
+        <MapContainer
+          center={location}
+          zoom={13}
+          scrollWheelZoom={false}
+          className="w-screen h-screen-without-bar"
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
       <div>
         <MapContainer
           center={location}
