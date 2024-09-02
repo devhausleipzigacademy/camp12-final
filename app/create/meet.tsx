@@ -46,7 +46,6 @@ import { TagInput } from "@/components/tagInput";
 const venue = "Clara-Zetkin-Park";
 
 type Props = {
-  isPublic: boolean;
   creatorId: string;
   guests: number;
   notes?: string;
@@ -82,7 +81,6 @@ const formSchema = z.object({
 });
 
 export default function UpdateMeet({
-  isPublic,
   tagSuggestions,
   creatorId,
   guests,
@@ -142,16 +140,18 @@ export default function UpdateMeet({
     event.preventDefault();
     console.log("submitting");
 
+    const formData = form.getValues();
+
     await createMeet({
-      date,
-      time,
-      duration,
-      isPublic,
+      date: formData.date,
+      time: formData.time,
+      duration: formData.duration,
+      isPublic: formData.public,
       creatorId,
       guests,
       notes,
       venueId,
-      activityTypeName: activityType,
+      activityTypeName: formData.activityType,
     });
 
     console.log("finished submitting");
