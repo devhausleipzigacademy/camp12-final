@@ -184,9 +184,12 @@ export function FilterDrawer() {
               <Checkbox
                 id="excludeCompetitive"
                 checked={excludeCompetitive}
-                onCheckedChange={(checked) =>
-                  setExcludeCompetitive(checked as boolean)
-                }
+                onCheckedChange={(checked) => {
+                  setExcludeCompetitive(checked as boolean);
+                  if (!checked) {
+                    setIsCompetitive(false);
+                  }
+                }}
               />
             </div>
 

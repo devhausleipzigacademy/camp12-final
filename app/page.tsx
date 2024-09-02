@@ -3,6 +3,8 @@ import { DrawerHomepage } from "@/components/DrawerHomepage";
 import Navbar from "../components/Navbar";
 import { Map } from "@/components/Map";
 import { getVenues, GetVenuesResult } from "@/app/api/data-access/venues";
+import { Meet } from "@prisma/client";
+import { log } from "console";
 
 type Filters = {
   activity?: string;
@@ -19,8 +21,6 @@ export default async function Home({
 }) {
   const venues = await getVenues();
 
-  console.log(venues);
-
   const parseBoolean = (val: string) => (val === "true" ? true : false);
 
   const filters = {
@@ -36,7 +36,9 @@ export default async function Home({
     venues: GetVenuesResult,
     filters: Filters
   ): GetVenuesResult {
-    const now = new Date(2024, 9, 20, 11);
+    const now = new Date(2024, 8, 20, 10);
+
+    // Somhow the time is always to hours earlier in the backend but i don't know if thats relevant, it still works
 
     return venues.filter((venue) => {
       if (filters.activity) {
@@ -44,51 +46,91 @@ export default async function Home({
           (at) => at.name.toLowerCase() === filters.activity?.toLowerCase()
         );
       }
+      function isMeetNow(meet: Meet) {
+        const meetDate = new Date(meet.date);
+        const [hours, minutes] = meet.time.split(":").map(Number);
+        // const isSameDay =
+        //   meet.date.getFullYear() === now.getFullYear() &&
+        //   meet.date.getMonth() === now.getMonth() &&
+        //   meet.date.getDate() === now.getDate();
+
+        // if (!isSameDay) return false;
+
+        const meetStart = new Date(meetDate);
+        meetStart.setHours(hours, minutes, 0, 0);
+        console.log("start", meetStart);
+
+        const meetEnd = new Date(meetStart.getTime() + meet.duration * 3600000);
+        console.log("end", meetEnd);
+        console.log("now", now);
+
+        return meetStart <= now && now <= meetEnd;
+      }
+      function isMeetPlanned(meet: Meet) {
+        const meetDate = new Date(meet.date);
+        const [hours, minutes] = meet.time.split(":").map(Number);
+        const isSameDay =
+          meet.date.getFullYear() === now.getFullYear() &&
+          meet.date.getMonth() === now.getMonth() &&
+          meet.date.getDate() === now.getDate();
+
+        if (!isSameDay) return false;
+
+        const meetStart = new Date(meetDate);
+        meetStart.setHours(hours, minutes, 0, 0);
+        console.log("start", meetStart);
+
+        const meetEnd = new Date(meetStart.getTime() + meet.duration * 3600000);
+        console.log("end", meetEnd);
+        console.log("now", now);
+
+        return now < meetStart;
+      }
+
       if (filters.status?.toLowerCase() === "free") {
         if (venue.meets.length === 0) return true;
-        // here for when something is planned but already over or not soon happening if (venue.meets.some((meet)=> meet.date ))
-        if (
-          venue.meets.some((meet) => {
-            const [hours, minutes] = meet.time.split(":").map(Number);
-            const meetStart = new Date(meet.date);
-            meetStart.setHours(hours, minutes, 0, 0);
-            console.log(meetStart);
-            meetStart <= now &&
-              now <= new Date(meetStart.getTime() + meet.duration * 3600000);
-          })
-        ) {
-          return false;
-        }
-        return true;
+        return !venue.meets.some(isMeetNow);
       }
+
       // do we need an occupied filter actually?
       if (filters.status?.toLowerCase() === "occupied") {
         if (
-          venue.meets.some(
-            const
-            (meet) =>
-              meet.date <= now &&
-              now <= new Date(meet.date.getTime() + meet.duration * 3600000) &&
-              meet.isPublic === false
-          )
+          venue.meets.some(isMeetNow) &&
+          venue.meets.some((meet) => meet.isPublic === false)
         )
-          return false;
-      }
-      if (filters.status?.toLowerCase() === "join") {
-        if (
-          venue.meets.some(
-            (meet) =>
-              meet.date <= now &&
-              now <= new Date(meet.date.getTime() + meet.duration * 3600000) &&
-              meet.isPublic === true
-          )
-        )
-          return false;
+          return true;
+        else return false;
       }
 
+      if (filters.status?.toLowerCase() === "join") {
+        if (
+          venue.meets.some(isMeetNow) &&
+          venue.meets.some((meet) => meet.isPublic === true)
+        )
+          return true;
+        else return false;
+      }
+
+      if (filters.status?.toLowerCase() === "planned") {
+        if (venue.meets.some(isMeetPlanned)) return true;
+        else return false;
+      }
+
+      if (filters.competitive) {
+        return venue.meets.some((meet) => meet.competitive === true);
+      }
+      if (filters.competitive === false) {
+        return venue.meets.some((meet) => meet.competitive === false);
+      }
       return true;
     });
   }
+
+  // Mussel gym yoga rummelsdorf public now
+  // Weisse Elster basketball alt-treptow private not now competitive
+  // Beach club cossi tennis rummelsdorf-oben public now non-competitive
+  //Boule bahn berlin boule Friedrichshain private now
+  // Filtering for tags!
 
   const filteredVenues = filterVenues(venues, filters);
   return (

@@ -162,6 +162,7 @@ async function main() {
       tags: { connect: [{ name: "Outdoor" }] },
       venueId: beachClubCossi.id,
       activityTypeId: tennis.id,
+      competitive: false,
     },
   });
   await prisma.meet.create({
@@ -186,10 +187,10 @@ async function main() {
       isPublic: true,
       creatorId: user2.id,
       participants: { connect: [{ id: user1.id }] },
-      notes: "ballin",
+      notes: "yogimogi",
       tags: { connect: [{ name: "Outdoor" }] },
       venueId: musselGym.id,
-      activityTypeId: basketball.id,
+      activityTypeId: yoga.id,
     },
   });
 
