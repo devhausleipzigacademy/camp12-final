@@ -3,51 +3,9 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  // Fetch venue IDs dynamically
-
-  console.log("Cleaning Database...");
-
-  await prisma.user.deleteMany();
-  await prisma.activityType.deleteMany();
-  await prisma.tag.deleteMany();
-  await prisma.badge.deleteMany();
-
-  console.log("Cleaning Database finished");
-
-  const weisseElster = await prisma.venue.upsert({
-    where: { name: "Weisse Elster" },
-    update: {},
-    create: {
-      name: "Weisse Elster",
-      location: "Clara Park",
-      image: "/Elster.jpg",
-    },
-  });
-
-  const musselGym = await prisma.venue.upsert({
-    where: { name: "Mussel Gym" },
-    update: {},
-    create: {
-      name: "Mussel Gym",
-      location: "Zschochersche Str",
-      image: "/mussel.jpg",
-    },
-  });
-
-  const beachClubCossi = await prisma.venue.upsert({
-    where: { name: "Beach Club Cossi" },
-    update: {},
-    create: {
-      name: "Beach Club Cossi",
-      location: "Cospudener See",
-      image: "/LiCossi.jpg",
-    },
-  });
-
   // Users
   const user1 = await prisma.user.create({
     data: {
-      id: "aserifkt547eu392",
       email: "user1@example.com",
       name: "Hans Meiser",
       settings: {
@@ -61,13 +19,12 @@ async function main() {
 
   const user2 = await prisma.user.create({
     data: {
-      id: "aserifkt547eu323",
       email: "user2@example.com",
       name: "Tine Wittler",
       settings: {
         create: {
-          friendsVisibility: "Friends_Only",
-          profileVisibility: "Friends_Only",
+          friendsVisibility: "OnlyFriends",
+          profileVisibility: "OnlyFriends",
         },
       },
     },
@@ -75,7 +32,6 @@ async function main() {
 
   const user3 = await prisma.user.create({
     data: {
-      id: "as222fkt547eu392",
       email: "user3@example.com",
       name: "Conchita Wurst",
       settings: {
@@ -111,6 +67,65 @@ async function main() {
       requiredNumberOfParticipants: 1,
     },
   });
+  const boule = await prisma.activityType.create({
+    data: {
+      name: "Boule",
+      description: "Tossing metal balls and drinking pastis",
+      requiredNumberOfParticipants: 2,
+    },
+  });
+
+  // Venues
+  const weisseElster = await prisma.venue.create({
+    data: {
+      name: "Weisse Elster",
+      location: "52.4926, 13.466",
+      image: "/elster.jpg",
+      activityTypes: {
+        connect: {
+          id: tennis.id,
+        },
+      },
+    },
+  });
+
+  const musselGym = await prisma.venue.create({
+    data: {
+      name: "Mussel Gym",
+      location: "52.5002, 13.4752",
+      image: "/mussel.jpg",
+      activityTypes: {
+        connect: {
+          id: yoga.id,
+        },
+      },
+    },
+  });
+
+  const beachClubCossi = await prisma.venue.create({
+    data: {
+      name: "Beach Club Cossi",
+      location: "52.5031, 13.4763",
+      image: "/cossi.jpg",
+      activityTypes: {
+        connect: {
+          id: basketball.id,
+        },
+      },
+    },
+  });
+  const bouleBahnBerlin = await prisma.venue.create({
+    data: {
+      name: "Boule Bahn Berlin",
+      location: "52.511, 13.4637",
+      image: "/example.png",
+      activityTypes: {
+        connect: {
+          id: boule.id,
+        },
+      },
+    },
+  });
 
   // Tags
   const outdoorTag = await prisma.tag.create({ data: { name: "Outdoor" } });
@@ -120,17 +135,18 @@ async function main() {
   // Meets (including one tournament)
   await prisma.meet.create({
     data: {
-      date: new Date("2024-09-15"),
+      date: new Date("2024-08-29"),
       time: "14:00",
       duration: 2,
       isPublic: false,
       creatorId: user1.id,
       participants: { connect: [{ id: user2.id }, { id: user3.id }] },
-      guests: 2,
+      guests: ["Dieter Bohlen", "Thomas Gottschalk"],
       notes: "Freundliches Basketballspiel",
       tags: { connect: [{ name: "Outdoor" }] },
       venueId: weisseElster.id,
       activityTypeId: basketball.id,
+      competitive: true,
     },
   });
 
@@ -142,11 +158,39 @@ async function main() {
       isPublic: true,
       creatorId: user2.id,
       participants: { connect: [{ id: user1.id }] },
-      guests: 2,
       notes: "Tennistraining",
       tags: { connect: [{ name: "Outdoor" }] },
       venueId: beachClubCossi.id,
       activityTypeId: tennis.id,
+      competitive: false,
+    },
+  });
+  await prisma.meet.create({
+    data: {
+      date: new Date("2024-09-20"),
+      time: "10:00",
+      duration: 3,
+      isPublic: false,
+      creatorId: user2.id,
+      participants: { connect: [{ id: user1.id }, { id: user2.id }] },
+      notes: "juhu boule",
+      tags: { connect: [{ name: "Outdoor" }] },
+      venueId: bouleBahnBerlin.id,
+      activityTypeId: boule.id,
+    },
+  });
+  await prisma.meet.create({
+    data: {
+      date: new Date("2024-09-20"),
+      time: "10:00",
+      duration: 1,
+      isPublic: true,
+      creatorId: user2.id,
+      participants: { connect: [{ id: user1.id }] },
+      notes: "yogimogi",
+      tags: { connect: [{ name: "Outdoor" }] },
+      venueId: musselGym.id,
+      activityTypeId: yoga.id,
     },
   });
 
@@ -174,11 +218,7 @@ async function main() {
     data: {
       name: "Anzeigenhauptmeister",
       icon: "/parkverbot.png",
-      users: {
-        connect: {
-          id: user2.id,
-        },
-      },
+      userId: user1.id,
     },
   });
 
@@ -186,6 +226,7 @@ async function main() {
     data: {
       name: "Turniersieger",
       icon: "/gold.svg",
+      userId: user2.id,
     },
   });
 
@@ -193,6 +234,7 @@ async function main() {
     data: {
       name: "Yoga-Meister",
       icon: "/yoga.svg",
+      userId: user3.id,
     },
   });
 
@@ -233,8 +275,8 @@ async function main() {
 main()
   .catch((e) => {
     console.error(e);
+    process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();
-    process.exit(0);
   });
