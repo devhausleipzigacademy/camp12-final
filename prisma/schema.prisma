@@ -41,26 +41,26 @@ model Session {
   user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
 }
 
-model Tournament {
-  id             String       @id @default(uuid())
-  date           DateTime
-  time           String
-  duration       Float
-  size           Int
-  type           String
-  mode           String
-  public         Boolean      @default(true)
-  creatorId      String
-  creator        User         @relation("CreatedTournaments", fields: [creatorId], references: [id], onDelete: Cascade)
-  participants   User[]       @relation("ParticipatedTournaments")
-  guests         String[]
-  note           String
-  tags           Tag[]
-  venue          Venue        @relation(fields: [venueId], references: [id])
-  venueId        String
-  activityType   ActivityType @relation(fields: [activityTypeId], references: [id])
-  activityTypeId String
-}
+// model Tournament {
+//   id             String       @id @default(uuid())
+//   date           DateTime
+//   time           String
+//   duration       Float
+//   size           Int
+//   type           String
+//   mode           String
+//   public         Boolean      @default(true)
+//   creatorId      String
+//   creator        User         @relation("CreatedTournaments", fields: [creatorId], references: [id], onDelete: Cascade)
+//   participants   User[]       @relation("ParticipatedTournaments")
+//   guests         String[]
+//   note           String
+//   tags           Tag[]
+//   venue          Venue        @relation(fields: [venueId], references: [id])
+//   venueId        String
+//   activityType   ActivityType @relation(fields: [activityTypeId], references: [id])
+//   activityTypeId String
+// }
 
 model Tag {
   name          String         @id @unique
@@ -98,6 +98,7 @@ model Meet {
   venueId        String
   activityType   ActivityType @relation(fields: [activityTypeId], references: [id])
   activityTypeId String
+  competitive    Boolean?
 }
 
 model ActivityType {

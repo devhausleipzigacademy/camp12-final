@@ -14,16 +14,17 @@ export default async function MeetDetail({
 }: {
   params: { eventId: string };
 }) {
-  const tournament = await prisma.tournament.findUnique({
+  const meet = await prisma.meet.findUnique({
     where: { id: params.eventId },
     include: { participants: true },
   });
 
-  if (!tournament) {
-    throw new Error("Tournament not found");
+  if (!meet) {
+    throw new Error("Meet not found");
   }
 
   const { eventId } = params;
+
   return (
     <main className="h-screen w-screen p-4">
       {/* Header */}
@@ -53,7 +54,7 @@ export default async function MeetDetail({
             <button className="bg-zinc-300 text-purple-700 text-xs rounded-full py-1 px-2">
               Show it on the map
             </button>
-            <MeetDrawer tournament={tournament} />
+            <MeetDrawer meet={meet} />
           </div>
         </div>
         {/* Tags and Form */}
