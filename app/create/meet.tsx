@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
 import { useForm, useWatch } from "react-hook-form";
-import { boolean, string, z } from "zod";
+import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -32,12 +32,11 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import React from "react";
-import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import GroupSizeSelect from "@/components/group-size-select";
-import { createMeet } from "@/actions/settings";
+import { createMeet, updateTags } from "@/actions/meet"; // updateTags is not in use yet?
 import { Tag } from "@prisma/client";
 import { TagInput } from "@/components/tagInput";
 
@@ -54,7 +53,7 @@ type Props = {
   tagSuggestions: Tag[];
 };
 
-// Defining a schema for Tournament Creation
+// Defining a schema for Meet Creation
 const formSchema = z.object({
   activityType: z.enum(["Tennis", "Basketball"], {
     required_error: "Choose a Sport",
@@ -62,14 +61,11 @@ const formSchema = z.object({
   mode: z.enum(["softie", "casual", "competetive"], {
     required_error: "Choose a Mode",
   }),
-  // tournamentType: z.enum(["single", "round"], {
-  //   required_error: "Choose a tournament type",
-  // }),
   public: z.boolean(),
   date: z.date({ required_error: "Date is required" }),
   time: z.string({ required_error: "Time is required" }),
   duration: z.number(),
-  participants: z.coerce
+  guests: z.coerce
     .number({
       invalid_type_error:
         "Please enter a number of people, you'd like to play with",
@@ -350,10 +346,16 @@ export default function UpdateMeet({
                   </FormItem>
                 )}
               />
-              {/* Participants */}
-              <FormItem>
-                <GroupSizeSelect groupSizes={[2, 4, 6]} />
-              </FormItem>
+              {/* Participants number */}
+              <FormField
+                control={form.control}
+                name="guests"
+                render={({ field }) => (
+                  <FormItem>
+                    <GroupSizeSelect groupSizes={[2, 4, 6, 8, 10]} />
+                  </FormItem>
+                )}
+              />
               {/* Tags */}
               <TagInput
                 suggestions={tagSuggestions}

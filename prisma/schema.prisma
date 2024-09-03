@@ -11,20 +11,18 @@ datasource db {
 }
 
 model User {
-  id                       String       @id
-  googleId                 String?      @unique
-  email                    String       @unique
-  name                     String?
-  picture                  String?
-  session                  Session[]
-  tournamentsCreated       Tournament[] @relation("CreatedTournaments")
-  tournamentsParticipating Tournament[] @relation("ParticipatedTournaments")
-  meetsCreated             Meet[]       @relation("CreatedMeets")
-  meetsParticipating       Meet[]       @relation("ParticipatedMeets")
-  badges                   Badge[]
-  friends                  User[]       @relation("Friends")
-  friendOf                 User[]       @relation("Friends")
-  settings                 Settings?
+  id                 String    @id
+  googleId           String?   @unique
+  email              String    @unique
+  name               String?
+  picture            String?
+  session            Session[]
+  meetsCreated       Meet[]    @relation("CreatedMeets")
+  meetsParticipating Meet[]    @relation("ParticipatedMeets")
+  badges             Badge[]
+  friends            User[]    @relation("Friends")
+  friendOf           User[]    @relation("Friends")
+  settings           Settings?
 }
 
 model Badge {
@@ -41,32 +39,31 @@ model Session {
   user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
 }
 
-model Tournament {
-  id             String       @id @default(uuid())
-  date           DateTime
-  time           String
-  duration       Float
-  size           Int
-  type           String
-  mode           String
-  public         Boolean      @default(true)
-  creatorId      String
-  creator        User         @relation("CreatedTournaments", fields: [creatorId], references: [id], onDelete: Cascade)
-  participants   User[]       @relation("ParticipatedTournaments")
-  guests         String[]
-  note           String
-  tags           Tag[]
-  venue          Venue        @relation(fields: [venueId], references: [id])
-  venueId        String
-  activityType   ActivityType @relation(fields: [activityTypeId], references: [id])
-  activityTypeId String
-}
+// model Tournament {
+//   id             String       @id @default(uuid())
+//   date           DateTime
+//   time           String
+//   duration       Float
+//   size           Int
+//   type           String
+//   mode           String
+//   public         Boolean      @default(true)
+//   creatorId      String
+//   creator        User         @relation("CreatedTournaments", fields: [creatorId], references: [id], onDelete: Cascade)
+//   participants   User[]       @relation("ParticipatedTournaments")
+//   guests         String[]
+//   note           String
+//   tags           Tag[]
+//   venue          Venue        @relation(fields: [venueId], references: [id])
+//   venueId        String
+//   activityType   ActivityType @relation(fields: [activityTypeId], references: [id])
+//   activityTypeId String
+// }
 
 model Tag {
   name          String         @id @unique
   venues        Venue[]
   meets         Meet[]
-  tournaments   Tournament[]
   activityTypes ActivityType[]
 }
 
@@ -76,7 +73,6 @@ model Venue {
   location      String
   image         String?
   tags          Tag[]
-  tournaments   Tournament[]
   meets         Meet[]
   activityTypes ActivityType[]
   reports       Report[]
@@ -101,11 +97,10 @@ model Meet {
 }
 
 model ActivityType {
-  id                           String       @id @default(uuid())
-  name                         String       @unique
+  id                           String  @id @default(uuid())
+  name                         String  @unique
   description                  String?
   requiredNumberOfParticipants Int
-  tournaments                  Tournament[]
   meets                        Meet[]
   tags                         Tag[]
   venues                       Venue[]

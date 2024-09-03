@@ -150,24 +150,24 @@ async function main() {
     },
   });
 
-  await prisma.tournament.create({
-    data: {
-      date: new Date("2024-10-01"),
-      time: "09:00",
-      duration: 6,
-      size: 16,
-      type: "Knockout",
-      mode: "Singles",
-      public: true,
-      creatorId: user3.id,
-      participants: { connect: [{ id: user1.id }, { id: user2.id }] },
-      guests: ["Barbara Schöneberger", "Günther Jauch"],
-      note: "Jährliches Tennisturnier",
-      tags: { connect: [{ name: "Outdoor" }, { name: "Indoor" }] },
-      venueId: musselGym.id,
-      activityTypeId: tennis.id,
-    },
-  });
+  // await prisma.tournament.create({
+  //   data: {
+  //     date: new Date("2024-10-01"),
+  //     time: "09:00",
+  //     duration: 6,
+  //     size: 16,
+  //     type: "Knockout",
+  //     mode: "Singles",
+  //     public: true,
+  //     creatorId: user3.id,
+  //     participants: { connect: [{ id: user1.id }, { id: user2.id }] },
+  //     guests: ["Barbara Schöneberger", "Günther Jauch"],
+  //     note: "Jährliches Tennisturnier",
+  //     tags: { connect: [{ name: "Outdoor" }, { name: "Indoor" }] },
+  //     venueId: musselGym.id,
+  //     activityTypeId: tennis.id,
+  //   },
+  // });
 
   // Badges
   await prisma.badge.create({
