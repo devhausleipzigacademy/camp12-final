@@ -23,7 +23,7 @@ import {
 } from "./ui/drawer";
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
-import { Button } from "./ui/button";
+// import { Button } from "./ui/button";
 
 const userId = "234";
 const meets = [
@@ -53,24 +53,24 @@ const meets = [
   },
 ];
 
-const tournaments = [
-  {
-    title: "Pingpong",
-    address: "Erich Zeigner Allee",
-    date: "29:08.2024",
-    img: "../public/DolliBu-Wild-Elephant-Unicorn-Plush-Stuffed-Animal-Toy-Super-Soft-Elephantcorn-Dress-Up-Removable-Outfit-Cute-Fantasy-Wildlife-Gift-12-Inch_b81bd1b7-ab9c-47a4-b273-8899acf69d63.3a2eef36493668f5b4e5d133e2559c3b.webp",
-    creatorId: "123",
-  },
-  {
-    title: "Hide & Seek",
-    address: "Behind Bushes",
-    date: "29:08.2024",
-    img: "../public/DolliBu-Wild-Elephant-Unicorn-Plush-Stuffed-Animal-Toy-Super-Soft-Elephantcorn-Dress-Up-Removable-Outfit-Cute-Fantasy-Wildlife-Gift-12-Inch_b81bd1b7-ab9c-47a4-b273-8899acf69d63.3a2eef36493668f5b4e5d133e2559c3b.webp",
-    creatorId: "234",
-  },
-];
+// const tournaments = [
+//   {
+//     title: "Pingpong",
+//     address: "Erich Zeigner Allee",
+//     date: "29:08.2024",
+//     img: "../public/DolliBu-Wild-Elephant-Unicorn-Plush-Stuffed-Animal-Toy-Super-Soft-Elephantcorn-Dress-Up-Removable-Outfit-Cute-Fantasy-Wildlife-Gift-12-Inch_b81bd1b7-ab9c-47a4-b273-8899acf69d63.3a2eef36493668f5b4e5d133e2559c3b.webp",
+//     creatorId: "123",
+//   },
+//   {
+//     title: "Hide & Seek",
+//     address: "Behind Bushes",
+//     date: "29:08.2024",
+//     img: "../public/DolliBu-Wild-Elephant-Unicorn-Plush-Stuffed-Animal-Toy-Super-Soft-Elephantcorn-Dress-Up-Removable-Outfit-Cute-Fantasy-Wildlife-Gift-12-Inch_b81bd1b7-ab9c-47a4-b273-8899acf69d63.3a2eef36493668f5b4e5d133e2559c3b.webp",
+//     creatorId: "234",
+//   },
+// ];
 
-type MeetOrTournament = {
+type Meet = {
   title: string;
   address: string;
   date: string;
@@ -80,15 +80,14 @@ type MeetOrTournament = {
 };
 
 type DrawerUpComingSessionsProps = {
-  meets: MeetOrTournament[];
-  tournaments: MeetOrTournament[];
+  meets: Meet[];
   userId: string;
 };
 
 export function DrawerUpComingSessions() {
-  const filteredData = [...meets, ...tournaments];
+  const filteredData = [...meets];
 
-  const renderCard = (item: MeetOrTournament, key: number) => (
+  const renderCard = (item: Meet, key: number) => (
     <Card key={key}>
       <CardHeader>
         <CardTitle>{item.title}</CardTitle>

@@ -108,7 +108,7 @@ async function main() {
     data: {
       name: "Yoga",
       description: "A physical and mental practice",
-      requiredNumberOfParticipants: 1,
+      requiredNumberOfParticipants: 2,
     },
   });
 
@@ -117,7 +117,7 @@ async function main() {
   const indoorTag = await prisma.tag.create({ data: { name: "Indoor" } });
   const relaxingTag = await prisma.tag.create({ data: { name: "Relaxing" } });
 
-  // Meets (including one tournament)
+  // Meets
   await prisma.meet.create({
     data: {
       date: new Date("2024-09-15"),

@@ -96,6 +96,28 @@ model Meet {
   activityTypeId String
 }
 
+//  date: Date;
+//     time: string;
+//     duration: number;
+//     isPublic: boolean;
+//     creator: {
+//         connect: {
+//             id: string;
+//         };
+//     };
+//     Venue: {
+//         connect: {
+//             id: string;
+//         };
+//     };
+//     activityType: {
+//         connect: {
+//             id: string;
+//         };
+//     };
+//     guests: number;
+//     notes: string | undefined;
+
 model ActivityType {
   id                           String  @id @default(uuid())
   name                         String  @unique

@@ -39,10 +39,9 @@ import GroupSizeSelect from "@/components/group-size-select";
 import { createMeet, updateTags } from "@/actions/meet"; // updateTags is not in use yet?
 import { Tag } from "@prisma/client";
 import { TagInput } from "@/components/tagInput";
+import { prisma } from "@/lib/db";
 
 // Venue hardcoded
-
-const venue = "Clara-Zetkin-Park";
 
 type Props = {
   isPublic: boolean;
@@ -51,11 +50,12 @@ type Props = {
   notes?: string;
   venueId: string;
   tagSuggestions: Tag[];
+  venueName: string;
 };
 
 // Defining a schema for Meet Creation
 const formSchema = z.object({
-  activityType: z.enum(["Tennis", "Basketball"], {
+  activityType: z.enum(["Ping Pong", "Basketball"], {
     required_error: "Choose a Sport",
   }),
   mode: z.enum(["softie", "casual", "competetive"], {
@@ -65,25 +65,25 @@ const formSchema = z.object({
   date: z.date({ required_error: "Date is required" }),
   time: z.string({ required_error: "Time is required" }),
   duration: z.number(),
-  guests: z.coerce
-    .number({
-      invalid_type_error:
-        "Please enter a number of people, you'd like to play with",
-    })
-    .positive({ message: "this👏is👏too👏low" }),
+  guests: z.coerce.number({
+    invalid_type_error:
+      "Please enter a number of people, you'd like to play with",
+  }),
+  // .positive({ message: "this👏is👏too👏low" }),
   competetive: z.boolean(),
   recurring: z.boolean(),
   equipment: z.string().trim().optional(),
   description: z.string().trim().optional(),
 });
 
-export default function UpdateMeet({
+export default function CreateMeet({
   isPublic,
   tagSuggestions,
   creatorId,
   guests,
   notes,
   venueId,
+  venueName,
 }: Props) {
   // Calender Popover open
   const [isOpen, setIsOpen] = useState(false);
@@ -96,7 +96,6 @@ export default function UpdateMeet({
       public: false,
       competetive: false,
       recurring: false,
-
       date: new Date(),
       time: "12:00",
       description: "",
@@ -115,7 +114,6 @@ export default function UpdateMeet({
     name: "public",
     defaultValue: false,
   });
-  console.log(privacy);
 
   const date = useWatch({
     control: form.control,
@@ -134,35 +132,43 @@ export default function UpdateMeet({
     console.log(form.formState.errors);
   }, [form.formState.errors]);
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    console.log("submitting");
+  // Handling form submission
 
-    await createMeet({
-      date,
-      time,
-      duration,
-      isPublic,
-      creatorId,
-      guests,
-      notes,
-      venueId,
-      activityTypeName: activityType,
-    });
+  const handleSubmit = form.handleSubmit(async (data) => {
+    try {
+      const response = await fetch("/api/create-meet", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
-    console.log("finished submitting");
-  };
+      if (!response.ok) {
+        throw new Error(`Failed to create meet: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+      toast.success(responseData.message);
+    } catch (error) {
+      console.error("failed to create meet:", error);
+      toast.error("Failed to create meet");
+    }
+  });
 
   const [value, setValue] = useState<string[]>([]);
 
   return (
     <>
       <Form {...form}>
-        <form className="space-y-8 w-full my-6 flex flex-col items-center">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-8 w-full my-6 flex flex-col items-center"
+        >
           <div>
             <div className="flex flex-col gap-4 items-center">
               <h2 className="text-xl font-bold pb-3">Create a Session</h2>
-              <span className="pb-6"> @ {venue}</span>
+              <span className="pb-6"> @ {venueName}</span>
               {/* Activity Type */}
               <FormField
                 control={form.control}
@@ -179,12 +185,11 @@ export default function UpdateMeet({
                           <SelectValue placeholder="Activity Type" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="tennis">Tennis</SelectItem>
+                          <SelectItem value="Ping Pong">Ping Pong</SelectItem>
                           <SelectItem value="Basketball">Basketball</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormControl>
-
                     <FormMessage />
                   </FormItem>
                 )}
@@ -212,7 +217,6 @@ export default function UpdateMeet({
                         </SelectContent>
                       </Select>
                     </FormControl>
-
                     <FormMessage />
                   </FormItem>
                 )}
@@ -284,6 +288,8 @@ export default function UpdateMeet({
                       })}
                     </ScrollArea>
                   </SelectContent>
+                  {/* maybe move this */}
+                  <FormMessage />
                 </Select>
               </div>
               {/* Duration */}
@@ -306,6 +312,8 @@ export default function UpdateMeet({
                           className="w-[270px]"
                         />
                       </FormControl>
+                      {/* maybe move this */}
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -343,6 +351,7 @@ export default function UpdateMeet({
                         </span>
                       </div>
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -352,7 +361,11 @@ export default function UpdateMeet({
                 name="guests"
                 render={({ field }) => (
                   <FormItem>
-                    <GroupSizeSelect groupSizes={[2, 4, 6, 8, 10]} />
+                    <GroupSizeSelect
+                      groupSizes={[2, 4, 6, 8, 10]}
+                      onChange={field.onChange}
+                    />
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -430,7 +443,6 @@ export default function UpdateMeet({
                         className="w-[270px]"
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -448,13 +460,12 @@ export default function UpdateMeet({
                         className="w-[270px]"
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
           </div>
-          <Button onClick={handleSubmit} type="submit" className="w-2/3">
+          <Button type="submit" className="w-2/3">
             Create
           </Button>
         </form>

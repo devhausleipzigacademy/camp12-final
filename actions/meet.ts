@@ -1,8 +1,11 @@
+"use server";
+
 // Import necessary dependencies
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { isFuture, isToday, format } from "date-fns";
 import { Tag } from "@prisma/client";
+import { NextApiRequest, NextApiResponse } from "next";
 
 // Helper function to check if a given time is in the future
 function isTimeInFuture(time: string) {
@@ -13,6 +16,9 @@ function isTimeInFuture(time: string) {
   // Compare meet time with current time
   return meetTimeNumber > timeNowNumber;
 }
+// const venue = await prisma.venue.findUniqueOrThrow({
+//   where: {},
+// });
 
 // creating a meet / session
 interface MeetProps {
@@ -24,10 +30,59 @@ interface MeetProps {
   guests: number;
   notes?: string;
   venueId: string;
-  activityTypeName: string;
+  activityTypeId: string;
 }
 
-export const createMeet = async ({
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method === "POST") {
+    const {
+      activityType,
+      mode,
+      public: isPublic,
+      date,
+      time,
+      duration,
+      guests,
+      notes,
+      venueId,
+    } = req.body;
+
+    try {
+      const activityTypeRecord = await prisma.activityType.findUnique({
+        where: { name: activityType },
+      });
+
+      if (!activityTypeRecord) {
+        throw new Error(`ActivityType "${activityType}" not found`);
+      }
+
+      await createMeet({
+        date: new Date(date),
+        time: time,
+        duration: duration,
+        mode,
+        isPublic,
+        creatorId: "1", // replace with the actual creatorId
+        guests,
+        notes,
+        venueId,
+        activityTypeId: activityTypeRecord.id,
+      });
+
+      res.status(200).json({ message: "Meet created successfully" });
+    } catch (error) {
+      console.error("failed to create meet:", error);
+      res.status(500).json({ message: "Failed to create meet" });
+    }
+  } else {
+    res.status(405).json({ message: "Method not allowed" });
+  }
+}
+
+export async function createMeet({
   date,
   time,
   duration,
@@ -36,8 +91,8 @@ export const createMeet = async ({
   guests,
   notes,
   venueId,
-  activityTypeName,
-}: MeetProps) => {
+  activityTypeId,
+}: MeetProps) {
   await prisma.meet.create({
     data: {
       date: date,
@@ -56,14 +111,14 @@ export const createMeet = async ({
       },
       activityType: {
         connect: {
-          name: activityTypeName,
+          id: activityTypeId,
         },
       },
       guests: guests,
       notes: notes,
     },
   });
-};
+}
 
 // Main function to delete a meet
 export async function deleteMeet(meetId: string, userId: string) {
