@@ -27,6 +27,7 @@ interface MeetProps {
   duration: number;
   isPublic: boolean;
   creatorId: string;
+  mode: string;
   guests: number;
   notes?: string;
   venueId: string;
