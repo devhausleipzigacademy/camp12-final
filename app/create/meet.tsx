@@ -47,7 +47,7 @@ type Props = {
   creatorId: string;
   guests: number;
   notes?: string;
-  venueId: string;
+  venueId?: string;
   tagSuggestions: Tag[];
   venueName: string;
 };

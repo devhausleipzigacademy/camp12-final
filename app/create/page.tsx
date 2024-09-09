@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/db";
 import CreateMeet from "./meet";
+import { validateRequest } from "@/lib/auth";
+import { error } from "console";
 
 // model Meet {
 //   id             String       @id @default(uuid())
@@ -20,6 +22,12 @@ import CreateMeet from "./meet";
 // }
 
 export default async function UpdateMeet() {
+  const { user } = await validateRequest();
+  const userfromDB = await prisma.user.findUnique({
+    where: { id: user?.id },
+    // include: {}
+  });
+
   const tags = await prisma.tag.findMany();
   // this has to be read from params when connected to the map
   let venue = null;
@@ -30,17 +38,20 @@ export default async function UpdateMeet() {
   } catch (error) {
     console.log(error);
   }
-
   return (
     <div>
-      <CreateMeet
-        isPublic={false}
-        creatorId={"as222fkt547eu392"}
-        guests={0}
-        venueId={venue.id}
-        venueName={venue.name}
-        tagSuggestions={tags}
-      />
+      {venue ? (
+        <CreateMeet
+          isPublic={false}
+          creatorId={user.id}
+          guests={0}
+          venueId={venue.id}
+          venueName={venue.name}
+          tagSuggestions={tags}
+        />
+      ) : (
+        <div>Venue not found</div>
+      )}
     </div>
   );
 }
