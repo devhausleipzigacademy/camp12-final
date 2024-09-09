@@ -1,6 +1,5 @@
 "use server";
 
-// Import necessary dependencies
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { isFuture, isToday, format } from "date-fns";
@@ -32,55 +31,6 @@ interface MeetProps {
   notes?: string;
   venueId: string;
   activityTypeId: string;
-}
-
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method === "POST") {
-    const {
-      activityType,
-      mode,
-      public: isPublic,
-      date,
-      time,
-      duration,
-      guests,
-      notes,
-      venueId,
-    } = req.body;
-
-    try {
-      const activityTypeRecord = await prisma.activityType.findUnique({
-        where: { name: activityType },
-      });
-
-      if (!activityTypeRecord) {
-        throw new Error(`ActivityType "${activityType}" not found`);
-      }
-
-      await createMeet({
-        date: new Date(date),
-        time: time,
-        duration: duration,
-        mode,
-        isPublic,
-        creatorId: "1", // replace with the actual creatorId
-        guests,
-        notes,
-        venueId,
-        activityTypeId: activityTypeRecord.id,
-      });
-
-      res.status(200).json({ message: "Meet created successfully" });
-    } catch (error) {
-      console.error("failed to create meet:", error);
-      res.status(500).json({ message: "Failed to create meet" });
-    }
-  } else {
-    res.status(405).json({ message: "Method not allowed" });
-  }
 }
 
 export async function createMeet({

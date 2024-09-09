@@ -39,7 +39,6 @@ import GroupSizeSelect from "@/components/group-size-select";
 import { createMeet, updateTags } from "@/actions/meet"; // updateTags is not in use yet?
 import { Tag } from "@prisma/client";
 import { TagInput } from "@/components/tagInput";
-import { prisma } from "@/lib/db";
 
 // Venue hardcoded
 
@@ -133,7 +132,6 @@ export default function CreateMeet({
   }, [form.formState.errors]);
 
   // Handling form submission
-
   const handleSubmit = form.handleSubmit(async (data) => {
     try {
       const response = await fetch("/api/create-meet", {
@@ -141,22 +139,30 @@ export default function CreateMeet({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          creatorId, // Make sure this is available in your component
+          venueId, // Make sure this is available in your component
+        }),
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to create meet: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create meet");
       }
 
-      const responseData = await response.json();
-      toast.success(responseData.message);
+      const result = await response.json();
+      console.log("finished submitting");
+      toast.success(result.message);
     } catch (error) {
       console.error("failed to create meet:", error);
-      toast.error("Failed to create meet");
+      toast.error("Failed to create meeting: " + (error as Error).message);
     }
   });
 
   const [value, setValue] = useState<string[]>([]);
+  // group size for participants
+  const groupSizes = Array.from({ length: 15 }, (_, i) => i + 1);
 
   return (
     <>
@@ -362,7 +368,7 @@ export default function CreateMeet({
                 render={({ field }) => (
                   <FormItem>
                     <GroupSizeSelect
-                      groupSizes={[2, 4, 6, 8, 10]}
+                      groupSizes={groupSizes}
                       onChange={field.onChange}
                     />
                     <FormMessage />

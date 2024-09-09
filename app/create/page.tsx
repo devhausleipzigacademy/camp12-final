@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/db";
 import CreateMeet from "./meet";
-import { error, log } from "console";
 
 // model Meet {
 //   id             String       @id @default(uuid())
