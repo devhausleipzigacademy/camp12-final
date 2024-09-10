@@ -1,34 +1,15 @@
 import { prisma } from "@/lib/db";
 import CreateMeet from "./meet";
-import { validateRequest } from "@/lib/auth";
-import { error } from "console";
+import { protectPage } from "@/lib/auth";
 
-// model Meet {
-//   id             String       @id @default(uuid())
-//   date           DateTime
-//   time           String
-//   duration       Float
-//   isPublic       Boolean      @default(false)
-//   creatorId      String
-//   creator        User         @relation("CreatedMeets", fields: [creatorId], references: [id], onDelete: Cascade)
-//   participants   User[]       @relation("ParticipatedMeets")
-//   guests         Int
-//   notes          String?
-//   tags           Tag[]
-//   Venue          Venue        @relation(fields: [venueId], references: [id], onDelete: Cascade)
-//   venueId        String
-//   activityType   ActivityType @relation(fields: [activityTypeId], references: [id])
-//   activityTypeId String
-// }
+// for now the venue is optional until the routing is fixed
 
 export default async function UpdateMeet() {
-  const { user } = await validateRequest();
-  const userfromDB = await prisma.user.findUnique({
-    where: { id: user?.id },
-    // include: {}
-  });
-
+  // user has to be logged in to be able to create a session
+  const user = await protectPage();
+  // fetching tags from db
   const tags = await prisma.tag.findMany();
+  // venue is hard coded, when routing is fixed, we can get the location/venue from params
   // this has to be read from params when connected to the map
   let venue = null;
   try {

@@ -127,22 +127,23 @@ export default function CreateMeet({
     name: "activityType",
   });
 
-  useEffect(() => {
-    console.log(form.formState.errors);
-  }, [form.formState.errors]);
+  // useEffect(() => {
+  //   console.log(form.formState.errors);
+  // }, [form.formState.errors]);
 
   // Handling form submission
+  // IGNORE PLS
   const handleSubmit = form.handleSubmit(async (data) => {
     try {
-      const response = await fetch("/api/create-meet", {
+      const response = await fetch("/create-meet", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           ...data,
-          creatorId, // Make sure this is available in your component
-          venueId, // Make sure this is available in your component
+          creatorId,
+          venueId,
         }),
       });
 
@@ -160,8 +161,11 @@ export default function CreateMeet({
     }
   });
 
+  // usestate for tags
   const [value, setValue] = useState<string[]>([]);
+
   // group size for participants
+  // could be connected to db
   const groupSizes = Array.from({ length: 15 }, (_, i) => i + 1);
 
   return (
@@ -193,6 +197,8 @@ export default function CreateMeet({
                         <SelectContent>
                           <SelectItem value="Ping Pong">Ping Pong</SelectItem>
                           <SelectItem value="Basketball">Basketball</SelectItem>
+                          {/* TO DO: Add Link to Activity Page */}
+                          <SelectItem value="">Add Activity</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormControl>

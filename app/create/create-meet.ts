@@ -10,7 +10,7 @@ export default async function meetHandler(
     const {
       activityType,
       mode,
-      public: isPublic,
+      isPublic,
       date,
       time,
       duration,
