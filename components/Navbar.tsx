@@ -9,11 +9,11 @@ import { DrawerCreateVenue } from "./DrawerCreateVenue";
 import { cn } from "@/lib/utils";
 import { FaTableTennis } from "react-icons/fa";
 
-type Props = {
+type NavbarProps = {
   userCreatedMeets: UserCreatedMeet[];
   userPariticpatingMeets: UserParticipatingMeet[];
   isDrawerOpen: boolean;
-  toggleCross: () => void; // Function to toggle crosshair visibility
+  toggleCross: () => void;
 };
 
 export default function Navbar({
@@ -21,12 +21,12 @@ export default function Navbar({
   userPariticpatingMeets,
   isDrawerOpen,
   toggleCross,
-}: Props) {
+}: NavbarProps) {
   return (
     <nav
       className={cn(
         "rounded-3xl absolute z-[999] bottom-4 right-4 left-4 p-5 bg-zinc-800/80 justify-between items-center",
-        isDrawerOpen ? "hidden" : "flex" // Conditionally hide navbar when drawer is open
+        isDrawerOpen ? "hidden" : "flex"
       )}
     >
       <DrawerUpComingSessions defaultTab="near-me">
@@ -34,7 +34,7 @@ export default function Navbar({
       </DrawerUpComingSessions>
       <FaLocationCrosshairs className="size-8 fill-white" />
       <button onClick={toggleCross}>
-        <FaCirclePlus className="size-8 fill-white" />{" "}
+        <FaCirclePlus className="size-8 fill-white" />
       </button>
       <Link href="/profile/me" className="nav-link">
         <div className="nav-button">
