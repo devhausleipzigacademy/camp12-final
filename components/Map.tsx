@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import "leaflet/dist/leaflet.css";
-import L, { icon, LatLngExpression, LatLngLiteral } from "leaflet";
+import L, { LatLngExpression } from "leaflet";
 import { MaptilerLayer } from "@maptiler/leaflet-maptilersdk";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
@@ -9,9 +9,6 @@ import { Venue } from "@/lib/utils/types";
 import { GetVenuesResult } from "@/app/api/data-acces/get-venues";
 import { GetOpenMeetsResult } from "@/app/api/data-acces/get-open-meets";
 import jsonData from "../lib/filtered_output_data.json";
-import "leaflet.markercluster/dist/MarkerCluster.css";
-import "leaflet.markercluster/dist/MarkerCluster.Default.css";
-import "leaflet.markercluster";
 import { CrosshairIcon, XIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import { GiCrosshair } from "react-icons/gi";
@@ -55,6 +52,18 @@ const meetIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
+// Define the red icon for the user pin
+const userLocationIcon = new L.Icon({
+  iconUrl:
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png", // Red pin icon for user location
+  shadowUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+
 export default function Map2({
   openDrawer,
   venues,
@@ -80,14 +89,16 @@ export default function Map2({
     if (map.current || !mapContainer.current) return;
 
     try {
+      // Initialize the map
       map.current = L.map(mapContainer.current, {
-        center: [51.3397, 12.3731],
+        center: [51.3397, 12.3731], // Default center
         zoom: 12,
         minZoom: 3,
         maxZoom: 18,
-        zoomControl: false, // Toggle zoom control based on isDrawerOpen
+        zoomControl: false,
       });
 
+      // Update crosshair position when the map stops moving
       map.current.on("moveend", () => {
         if (map.current) {
           const center = map.current.getCenter();
@@ -102,6 +113,7 @@ export default function Map2({
       const VenueMarkers = L.markerClusterGroup();
       const OpenMeetMarkers = L.markerClusterGroup();
 
+      // Loop through venues and add them to the map
       venues.forEach((venue) => {
         if (venue.location && venue.location.length === 2) {
           const marker = L.marker(venue.location as L.LatLngTuple, {
@@ -123,8 +135,6 @@ export default function Map2({
         }
       });
       map.current.addLayer(VenueMarkers);
-
-      console.log(openMeets);
 
       openMeets.forEach((meet) => {
         if (meet.location && meet.location.length === 2) {
@@ -151,7 +161,7 @@ export default function Map2({
       console.error("Error initializing map:", error);
       setLoading(false);
     }
-  }, [venues, openMeets, openDrawer, isDrawerOpen]); // Add isDrawerOpen to dependencies
+  }, [venues, openMeets, openDrawer, isDrawerOpen]);
 
   useEffect(() => {
     if ("geolocation" in navigator) {
@@ -161,14 +171,21 @@ export default function Map2({
           const userPos: LatLngExpression = [latitude, longitude];
           setUserPosition(userPos);
           setLoading(false);
+
           if (map.current) {
+            // Center the map on the user position
             map.current.setView(userPos, 13);
-            L.marker(userPos).addTo(map.current).bindPopup("You are here");
+
+            // Add a red pin at the user's location
+            L.marker(userPos, { icon: userLocationIcon }) // Use the orange icon for the user's location
+              .addTo(map.current)
+              .bindPopup("You are here")
+              .openPopup();
           }
         },
         (error) => {
           console.error("Error getting user location:", error);
-          setUserPosition([51.3397, 12.3731]);
+          setUserPosition([51.3397, 12.3731]); // Default location if user location is unavailable
           setLoading(false);
         },
         {
@@ -212,7 +229,7 @@ export default function Map2({
   return (
     <div ref={mapContainer} className="h-screen w-screen absolute">
       {crossVisible ? (
-        <div className="absolute  top-1/2 left-1/2 z-[999] -translate-x-1/2 -translate-y-1/2">
+        <div className="absolute top-1/2 left-1/2 z-[999] -translate-x-1/2 -translate-y-1/2">
           <GiCrosshair className="size-20" />
         </div>
       ) : null}
@@ -233,66 +250,62 @@ export default function Map2({
   );
 }
 
-/**
- * Calculates the distance between two geographical points using the Haversine formula.
- * @param point1 - The first geographical point (latitude, longitude).
- * @param point2 - The second geographical point (latitude, longitude).
- * @returns The distance in meters between the two points.
- */
+// Function to calculate the distance between two points using the Haversine formula
 function calculateDistance(
-  point1: LatLngExpression,
-  point2: LatLngExpression
+  userLocation: LatLngExpression,
+  venueLocation: LatLngExpression
 ): number {
-  // Type assertion to treat point1 and point2 as [number, number]
-  const [lat1, lon1] = point1 as [number, number];
-  const [lat2, lon2] = point2 as [number, number];
+  const [lat1, lon1] = getLatLng(userLocation);
+  const [lat2, lon2] = getLatLng(venueLocation);
 
-  const R = 6371e3; // Earth's radius in meters
-  const lat1Rad = (lat1 * Math.PI) / 180;
-  const lat2Rad = (lat2 * Math.PI) / 180;
-  const deltaLatRad = ((lat2 - lat1) * Math.PI) / 180;
-  const deltaLonRad = ((lon2 - lon1) * Math.PI) / 180;
+  const R = 6371000; // Radius of the Earth in meters
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
 
   const a =
-    Math.sin(deltaLatRad / 2) * Math.sin(deltaLatRad / 2) +
-    Math.cos(lat1Rad) *
-      Math.cos(lat2Rad) *
-      Math.sin(deltaLonRad / 2) *
-      Math.sin(deltaLonRad / 2);
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-  return R * c;
+  return R * c; // Distance in meters
 }
+
+// Helper function to extract latitude and longitude from LatLngExpression
+function getLatLng(location: LatLngExpression): [number, number] {
+  if (Array.isArray(location)) {
+    // If it's a tuple (array), ensure it's exactly [number, number]
+    const [lat, lng] = location; // Extract the first two elements
+    return [lat, lng];
+  } else if (location instanceof L.LatLng) {
+    // If it's a LatLng object, extract lat and lng
+    return [location.lat, location.lng];
+  }
+  throw new Error("Invalid LatLngExpression");
+}
+
+// Function to get the nearest venue to the user location
 function getNearestVenue(
   userLocation: LatLngExpression,
-  venues: Venue[]
+  venues: GetVenuesResult
 ): LatLngExpression | null {
-  const userLoc = userLocation as [number, number];
-  let result: LatLngExpression = userLocation;
+  let nearestVenue: LatLngExpression | null = null;
   let minDistance = Infinity;
 
-  for (let key in jsonData) {
-    const venueLoc: [number, number] = jsonData[key].geolocation as [
-      number,
-      number
-    ];
-    if (!venueLoc) continue;
-
-    venues.forEach((venue) => {
-      if (venue.location && venue.location.length === 2) {
-        const venueLoc: [number, number] = venue.location as [number, number];
-
-        const distance = Math.sqrt(
-          Math.pow(userLoc[0] - venueLoc[0], 2) +
-            Math.pow(userLoc[1] - venueLoc[1], 2)
-        );
-
-        if (distance < minDistance) {
-          minDistance = distance;
-          result = venueLoc;
-        }
+  venues.forEach((venue) => {
+    if (venue.location && venue.location.length === 2) {
+      const distance = calculateDistance(
+        userLocation,
+        venue.location as LatLngExpression
+      );
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestVenue = venue.location as LatLngExpression;
       }
-    });
-  }
-  return result;
+    }
+  });
+
+  return nearestVenue;
 }
