@@ -13,7 +13,7 @@ type Props = {
   userCreatedMeets: UserCreatedMeet[];
   userPariticpatingMeets: UserParticipatingMeet[];
   isDrawerOpen: boolean;
-  toggleCross: () => void;
+  toggleCross: () => void; // Function to toggle crosshair visibility
 };
 
 export default function Navbar({
@@ -24,10 +24,9 @@ export default function Navbar({
 }: Props) {
   return (
     <nav
-      // Use the cn function to merge classes conditionally
       className={cn(
         "rounded-3xl absolute z-[999] bottom-4 right-4 left-4 p-5 bg-zinc-800/80 justify-between items-center",
-        isDrawerOpen ? "hidden" : "flex" // This class is conditionally applied when isDrawerOpen is true
+        isDrawerOpen ? "hidden" : "flex" // Conditionally hide navbar when drawer is open
       )}
     >
       <DrawerUpComingSessions defaultTab="near-me">
@@ -37,7 +36,6 @@ export default function Navbar({
       <button onClick={toggleCross}>
         <FaCirclePlus className="size-8 fill-white" />{" "}
       </button>
-      {/* <DrawerCreateVenue /> */}
       <Link href="/profile/me" className="nav-link">
         <div className="nav-button">
           <div className="flex flex-col items-center justify-center">
