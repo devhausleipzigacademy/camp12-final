@@ -8,7 +8,6 @@ import "leaflet.markercluster";
 import { Venue } from "@/lib/utils/types";
 import { GetVenuesResult } from "@/app/api/data-acces/get-venues";
 import { GetOpenMeetsResult } from "@/app/api/data-acces/get-open-meets";
-import jsonData from "../lib/filtered_output_data.json";
 import { CrosshairIcon, XIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import { GiCrosshair } from "react-icons/gi";
@@ -28,6 +27,7 @@ type MapProps = {
   crossVisible: boolean;
   close: () => void;
   updateCrossPos: (pos: LatLngExpression) => void;
+  centerUserOnMap: boolean; // New prop to decide if user should be centered
 };
 
 const venueIcon = new L.Icon({
@@ -60,6 +60,7 @@ export default function Map2({
   crossVisible,
   close,
   updateCrossPos,
+  centerUserOnMap, // Use this to decide when to center the map on user
 }: MapProps) {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<L.Map | null>(null);
@@ -148,6 +149,7 @@ export default function Map2({
     }
   }, [venues, openMeets, openDrawer, isDrawerOpen]);
 
+  // Effect to handle user geolocation
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -156,14 +158,15 @@ export default function Map2({
           const userPos: LatLngExpression = [latitude, longitude];
           setUserPosition(userPos);
           setLoading(false);
-          if (map.current) {
+          // Only center the map on the user's position when the crosshair button is clicked
+          if (centerUserOnMap && map.current) {
             map.current.setView(userPos, 13);
             L.marker(userPos).addTo(map.current).bindPopup("You are here");
           }
         },
         (error) => {
           console.error("Error getting user location:", error);
-          setUserPosition([51.3397, 12.3731]);
+          setUserPosition([51.3397, 12.3731]); // Fallback to default location
           setLoading(false);
         },
         {
@@ -175,39 +178,7 @@ export default function Map2({
       console.error("Geolocation is not supported by this browser");
       setLoading(false);
     }
-  }, [venues]);
-
-  useEffect(() => {
-    if (!map.current) return;
-
-    function handleClick() {
-      if (userPositionRef.current) {
-        const nearestVenue = getNearestVenue(userPositionRef.current, venues);
-        if (nearestVenue) {
-          const distance = calculateDistance(
-            userPositionRef.current,
-            nearestVenue
-          );
-          const distanceFormatted = (distance / 1000).toFixed(2) + " km";
-          map.current?.flyTo(nearestVenue, 16);
-          const venueData: VenueData = {
-            name: "Nearest Venue",
-            address: "Some Address",
-            distance: distanceFormatted,
-            geolocation: nearestVenue,
-          };
-          setTimeout(() => openDrawer(venueData), 1500);
-        }
-      } else {
-        console.error("User position is not available");
-      }
-    }
-
-    map.current.on("click", handleClick);
-    return () => {
-      map.current?.off("click", handleClick);
-    };
-  }, [venues, openDrawer]);
+  }, [venues, centerUserOnMap]); // Add `centerUserOnMap` to re-trigger the centering
 
   return (
     <div ref={mapContainer} className="h-screen w-screen absolute">
@@ -231,53 +202,4 @@ export default function Map2({
       ) : null}
     </div>
   );
-}
-
-function calculateDistance(
-  point1: LatLngExpression,
-  point2: LatLngExpression
-): number {
-  const [lat1, lon1] = point1 as [number, number];
-  const [lat2, lon2] = point2 as [number, number];
-
-  const R = 6371e3;
-  const lat1Rad = (lat1 * Math.PI) / 180;
-  const lat2Rad = (lat2 * Math.PI) / 180;
-  const deltaLatRad = ((lat2 - lat1) * Math.PI) / 180;
-  const deltaLonRad = ((lon2 - lon1) * Math.PI) / 180;
-
-  const a =
-    Math.sin(deltaLatRad / 2) * Math.sin(deltaLatRad / 2) +
-    Math.cos(lat1Rad) *
-      Math.cos(lat2Rad) *
-      Math.sin(deltaLonRad / 2) *
-      Math.sin(deltaLonRad / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-  return R * c;
-}
-
-function getNearestVenue(
-  userLocation: LatLngExpression,
-  venues: Venue[]
-): LatLngExpression | null {
-  const userLoc = userLocation as [number, number];
-  let result: LatLngExpression = userLocation;
-  let minDistance = Infinity;
-
-  venues.forEach((venue) => {
-    if (venue.location && venue.location.length === 2) {
-      const venueLoc: [number, number] = venue.location as [number, number];
-      const distance = Math.sqrt(
-        Math.pow(userLoc[0] - venueLoc[0], 2) +
-          Math.pow(userLoc[1] - venueLoc[1], 2)
-      );
-
-      if (distance < minDistance) {
-        minDistance = distance;
-        result = venueLoc;
-      }
-    }
-  });
-  return result;
 }

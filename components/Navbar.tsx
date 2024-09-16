@@ -5,7 +5,6 @@ import { FaCirclePlus, FaUser } from "react-icons/fa6";
 import { FaLocationCrosshairs } from "react-icons/fa6";
 import { DrawerUpComingSessions } from "./DrawerUpComingSessions";
 import { UserCreatedMeet, UserParticipatingMeet } from "@/lib/utils/getMeets";
-import { DrawerCreateVenue } from "./DrawerCreateVenue";
 import { cn } from "@/lib/utils";
 import { FaTableTennis } from "react-icons/fa";
 
@@ -14,35 +13,43 @@ type NavbarProps = {
   userPariticpatingMeets: UserParticipatingMeet[];
   isDrawerOpen: boolean;
   toggleCross: () => void;
+  toggleDrawer: () => void;
+  centerMapOnUser: () => void; // Add this function to center the map on the user
 };
 
-export default function Navbar({
+const Navbar: React.FC<NavbarProps> = ({
   userCreatedMeets,
   userPariticpatingMeets,
   isDrawerOpen,
   toggleCross,
-}: NavbarProps) {
+  toggleDrawer,
+  centerMapOnUser, // Use this to center the map
+}) => {
   return (
-    <nav
+    <div
       className={cn(
-        "rounded-3xl absolute z-[999] bottom-4 right-4 left-4 p-5 bg-zinc-800/80 justify-between items-center",
-        isDrawerOpen ? "hidden" : "flex"
+        "w-full fixed bottom-0 flex justify-between p-4 text-3xl bg-white text-primary items-center"
       )}
     >
-      <DrawerUpComingSessions defaultTab="near-me">
-        <FaTableTennis className="size-8 fill-white" />
-      </DrawerUpComingSessions>
-      <FaLocationCrosshairs className="size-8 fill-white" />
-      <button onClick={toggleCross}>
-        <FaCirclePlus className="size-8 fill-white" />
-      </button>
-      <Link href="/profile/me" className="nav-link">
-        <div className="nav-button">
-          <div className="flex flex-col items-center justify-center">
-            <FaUser className="size-8 fill-white" />
-          </div>
-        </div>
+      <FaTableTennis
+        onClick={toggleDrawer}
+        className={cn(
+          "cursor-pointer",
+          isDrawerOpen ? "text-primary" : "text-gray-400"
+        )}
+      />
+      <FaLocationCrosshairs
+        className="cursor-pointer text-gray-400"
+        onClick={centerMapOnUser} // Center map on user location when clicked
+      />
+      <Link href={"/create-meet"}>
+        <FaCirclePlus className="cursor-pointer text-gray-400" />
       </Link>
-    </nav>
+      <Link href={"/profile"}>
+        <FaUser className="cursor-pointer text-gray-400" />
+      </Link>
+    </div>
   );
-}
+};
+
+export default Navbar;
