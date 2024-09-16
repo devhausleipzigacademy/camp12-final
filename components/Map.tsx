@@ -28,6 +28,7 @@ type MapProps = {
   close: () => void;
   updateCrossPos: (pos: LatLngExpression) => void;
   centerUserOnMap: boolean; // New prop to decide if user should be centered
+  setCenterUserOnMap: (val: boolean) => void; // New prop to set center flag
 };
 
 const venueIcon = new L.Icon({
@@ -60,7 +61,8 @@ export default function Map2({
   crossVisible,
   close,
   updateCrossPos,
-  centerUserOnMap, // Use this to decide when to center the map on user
+  centerUserOnMap,
+  setCenterUserOnMap, // New setter function for centerUserOnMap
 }: MapProps) {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<L.Map | null>(null);
@@ -162,6 +164,7 @@ export default function Map2({
           if (centerUserOnMap && map.current) {
             map.current.setView(userPos, 13);
             L.marker(userPos).addTo(map.current).bindPopup("You are here");
+            setCenterUserOnMap(false); // Reset the flag after centering
           }
         },
         (error) => {
@@ -178,7 +181,7 @@ export default function Map2({
       console.error("Geolocation is not supported by this browser");
       setLoading(false);
     }
-  }, [venues, centerUserOnMap]); // Add `centerUserOnMap` to re-trigger the centering
+  }, [venues, centerUserOnMap, setCenterUserOnMap]); // Add `centerUserOnMap` to re-trigger the centering
 
   return (
     <div ref={mapContainer} className="h-screen w-screen absolute">

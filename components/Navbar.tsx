@@ -8,48 +8,53 @@ import { UserCreatedMeet, UserParticipatingMeet } from "@/lib/utils/getMeets";
 import { cn } from "@/lib/utils";
 import { FaTableTennis } from "react-icons/fa";
 
-type NavbarProps = {
+type Props = {
   userCreatedMeets: UserCreatedMeet[];
   userPariticpatingMeets: UserParticipatingMeet[];
   isDrawerOpen: boolean;
   toggleCross: () => void;
-  toggleDrawer: () => void;
-  centerMapOnUser: () => void; // Add this function to center the map on the user
+  centerMapOnUser: () => void; // New prop for centering the map
 };
 
-const Navbar: React.FC<NavbarProps> = ({
+export default function Navbar({
   userCreatedMeets,
   userPariticpatingMeets,
   isDrawerOpen,
   toggleCross,
-  toggleDrawer,
-  centerMapOnUser, // Use this to center the map
-}) => {
+  centerMapOnUser, // Add the centerMapOnUser function
+}: Props) {
   return (
-    <div
+    <nav
+      // Use the cn function to merge classes conditionally
       className={cn(
-        "w-full fixed bottom-0 flex justify-between p-4 text-3xl bg-white text-primary items-center z-[1000]" // Ensure high z-index so it stays above the map
+        "rounded-3xl absolute z-[999] bottom-4 right-4 left-4 p-5 bg-zinc-800/80 justify-between items-center",
+        isDrawerOpen ? "hidden" : "flex" // This class is conditionally applied when isDrawerOpen is true
       )}
     >
-      <FaTableTennis
-        onClick={toggleDrawer}
-        className={cn(
-          "cursor-pointer",
-          isDrawerOpen ? "text-primary" : "text-gray-400"
-        )}
-      />
-      <FaLocationCrosshairs
-        className="cursor-pointer text-gray-400"
-        onClick={centerMapOnUser} // Center map on user location when clicked
-      />
-      <Link href={"/create-meet"}>
-        <FaCirclePlus className="cursor-pointer text-gray-400" />
-      </Link>
-      <Link href={"/profile"}>
-        <FaUser className="cursor-pointer text-gray-400" />
-      </Link>
-    </div>
-  );
-};
+      {/* Drawer for Upcoming Sessions */}
+      <DrawerUpComingSessions defaultTab="near-me">
+        <FaTableTennis className="size-8 fill-white" />
+      </DrawerUpComingSessions>
 
-export default Navbar;
+      {/* Crosshair Icon that triggers centering the map */}
+      <FaLocationCrosshairs
+        className="size-8 fill-white cursor-pointer"
+        onClick={centerMapOnUser} // Call the centerMapOnUser function when this is clicked
+      />
+
+      {/* Create Meet button */}
+      <button onClick={toggleCross}>
+        <FaCirclePlus className="size-8 fill-white" />
+      </button>
+
+      {/* Link to the user's profile */}
+      <Link href="/profile/me" className="nav-link">
+        <div className="nav-button">
+          <div className="flex flex-col items-center justify-center">
+            <FaUser className="size-8 fill-white" />
+          </div>
+        </div>
+      </Link>
+    </nav>
+  );
+}
