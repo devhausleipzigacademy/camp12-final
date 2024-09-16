@@ -28,7 +28,7 @@ const Navbar: React.FC<NavbarProps> = ({
   return (
     <div
       className={cn(
-        "w-full fixed bottom-0 flex justify-between p-4 text-3xl bg-white text-primary items-center"
+        "w-full fixed bottom-0 flex justify-between p-4 text-3xl bg-white text-primary items-center z-[1000]" // Ensure high z-index so it stays above the map
       )}
     >
       <FaTableTennis
