@@ -37,6 +37,7 @@ import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
+import RecurranceForm from "./recurrenceForm";
 
 type Props = {
   userId: string;
@@ -47,7 +48,12 @@ type Props = {
 
 // Defining a schema for Meetsession Creation
 
-export default function MeetForm({ userId, venueId, venueName, location }: Props) {
+export default function MeetForm({
+  userId,
+  venueId,
+  venueName,
+  location,
+}: Props) {
   // Calender Popover open
   const [isOpen, setIsOpen] = useState(false);
 
@@ -98,7 +104,6 @@ export default function MeetForm({ userId, venueId, venueName, location }: Props
     control: form.control,
     name: "activityType",
   });
-  
 
   useEffect(() => {
     console.log(form.formState.errors);
@@ -107,8 +112,11 @@ export default function MeetForm({ userId, venueId, venueName, location }: Props
   const onSubmit = async (values: z.infer<typeof meetSchema>) => {
     console.log("submitting");
     console.log(values);
-    if (location) {await submitMeetWithLocation(values, userId, location)}
-   else if (venueId) {await submitMeetWithVenue(values, userId, venueId)};
+    if (location) {
+      await submitMeetWithLocation(values, userId, location);
+    } else if (venueId) {
+      await submitMeetWithVenue(values, userId, venueId);
+    }
   };
 
   // guest number from 1-15
@@ -124,15 +132,13 @@ export default function MeetForm({ userId, venueId, venueName, location }: Props
           <div>
             <div className="flex flex-col gap-4 items-center">
               <h2 className="text-xl font-bold pb-3">Create a Session</h2>
-              {
-                venueId ? (
-                  <span className="pb-6"> @ {venueName}</span>
-                ) : (
-                  <span className="pb-6">@ {location}</span>
-                )
-              }
+              {venueId ? (
+                <span className="pb-6"> @ {venueName}</span>
+              ) : (
+                <span className="pb-6">@ {location}</span>
+              )}
               {/* Activity Type */}
-              {(
+              {
                 <FormField
                   control={form.control}
                   name="activityType"
@@ -160,7 +166,7 @@ export default function MeetForm({ userId, venueId, venueName, location }: Props
                     </FormItem>
                   )}
                 />
-              )}
+              }
               {/* Level */}
               <FormField
                 control={form.control}
@@ -325,17 +331,16 @@ export default function MeetForm({ userId, venueId, venueName, location }: Props
                 render={({ field }) => (
                   <FormItem>
                     <Select onValueChange={field.onChange}>
-                    <SelectTrigger className="min-w-full">
-                      <SelectValue placeholder={"select group size"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {groupSizes.map((size) => (
-                        <SelectItem key={size} value={size.toString()}>
-                          {size}
-                        </SelectItem>
-                        
-                      ))}
-                    </SelectContent>
+                      <SelectTrigger className="min-w-full">
+                        <SelectValue placeholder={"select group size"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {groupSizes.map((size) => (
+                          <SelectItem key={size} value={size.toString()}>
+                            {size}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
                     </Select>
                   </FormItem>
                 )}
@@ -381,20 +386,23 @@ export default function MeetForm({ userId, venueId, venueName, location }: Props
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <div className="flex gap-4">
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                        <span
-                          className={cn(
-                            field.value === true
-                              ? "text-black font-bold"
-                              : "text-muted-foreground"
-                          )}
-                        >
-                          Recurring
-                        </span>
+                      <div className="flex flex-col gap-4">
+                        <div className="flex flex-row gap-4 justify-center">
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                          <span
+                            className={cn(
+                              field.value === true
+                                ? "text-black font-bold"
+                                : "text-muted-foreground"
+                            )}
+                          >
+                            Recurring
+                          </span>
+                        </div>
+                        {field.value && <RecurranceForm />}
                       </div>
                     </FormControl>
                     <FormMessage />
