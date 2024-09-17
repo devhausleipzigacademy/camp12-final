@@ -13,7 +13,7 @@ type Props = {
   userPariticpatingMeets: UserParticipatingMeet[];
   isDrawerOpen: boolean;
   toggleCross: () => void;
-  centerMapOnUser: () => void; // New prop for centering the map
+  toggleCenter: () => void; // New prop for centering the map
 };
 
 export default function Navbar({
@@ -21,7 +21,7 @@ export default function Navbar({
   userPariticpatingMeets,
   isDrawerOpen,
   toggleCross,
-  centerMapOnUser, // Add the centerMapOnUser function
+  toggleCenter, // Add the centerMapOnUser function
 }: Props) {
   return (
     <nav
@@ -39,7 +39,7 @@ export default function Navbar({
       {/* Crosshair Icon that triggers centering the map */}
       <FaLocationCrosshairs
         className="size-8 fill-white cursor-pointer"
-        onClick={centerMapOnUser} // Call the centerMapOnUser function when this is clicked
+        onClick={toggleCenter} // Call the centerMapOnUser function when this is clicked
       />
 
       {/* Create Meet button */}

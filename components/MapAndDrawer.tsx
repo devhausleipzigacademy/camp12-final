@@ -32,38 +32,42 @@ export default function MapAndDrawer({
   const [selectedVenue, setSelectedVenue] = useState<VenueData | null>(null);
   const [crossVisible, setCrossVisible] = useState(false);
   const [crossPos, setCrossPos] = useState<LatLngExpression | null>(null);
+const [centerUserOnMap, setCenterUserOnMap] = useState(false);
 
-  const toggleCross = () => setCrossVisible((prev) => !prev);
-  const close = () => setCrossVisible(false);
-  const updateCrossPos = (pos: LatLngExpression) => setCrossPos(pos);
+const toggleCross = () => setCrossVisible((prev) => !prev);
+const toggleCenter = () => setCenterUserOnMap((prev) => !prev);
+const close = () => setCrossVisible(false);
+const updateCrossPos = (pos: LatLngExpression) => setCrossPos(pos);
 
-  const openDrawer = (venueData: VenueData) => {
-    setSelectedVenue(venueData);
-    setIsDrawerOpen(true);
-  };
+const openDrawer = (venueData: VenueData) => {
+  setSelectedVenue(venueData);
+  setIsDrawerOpen(true);
+};
 
-  return (
-    <div>
-      <Map
-        crossVisible={crossVisible}
-        close={close}
-        openDrawer={openDrawer}
-        venues={venues}
-        openMeets={openMeets}
-        isDrawerOpen={isDrawerOpen}
-        updateCrossPos={updateCrossPos}
-      />
-      <DrawerHompage
-        isOpen={isDrawerOpen}
-        setIsOpen={setIsDrawerOpen}
-        venueData={selectedVenue}
-      />
-      <Navbar
-        userCreatedMeets={userCreatedMeets}
-        userPariticpatingMeets={userPariticpatingMeets}
-        isDrawerOpen={isDrawerOpen}
-        toggleCross={toggleCross}
-      />
-    </div>
-  );
+return (
+  <div>
+    <Map
+      crossVisible={crossVisible}
+      close={close}
+      openDrawer={openDrawer}
+      venues={venues}
+      openMeets={openMeets}
+      isDrawerOpen={isDrawerOpen}
+      updateCrossPos={updateCrossPos}
+      centerUserOnMap={centerUserOnMap}
+    />
+    <DrawerHompage
+      isOpen={isDrawerOpen}
+      setIsOpen={setIsDrawerOpen}
+      venueData={selectedVenue}
+    />
+    <Navbar
+      userCreatedMeets={userCreatedMeets}
+      userPariticpatingMeets={userPariticpatingMeets}
+      isDrawerOpen={isDrawerOpen}
+      toggleCross={toggleCross}
+      toggleCenter={toggleCenter}
+    />
+  </div>
+);
 }
