@@ -48,7 +48,7 @@ const SearchPage = async ({
               <p className="text-sm text-zinc-500">{result.email}</p>
                 </div>
                 <div>
-                  <Link href={`api/send-friend-request?from=${user.id}&to=${result.id}`}>
+                  <Link href={`/api/send-friend-request?from=${user.id}&to=${result.id}`}>
                     <Button>Send Friend Request</Button>
                   </Link>
                 </div>

@@ -9,11 +9,10 @@ import React from "react";
 import { protectPage } from "@/lib/auth";
 
 export default async function FriendSearchPage() {
-  
-  const { user } = await protectPage();
 
-  return <>
+  await protectPage();
   
-  <SearchFriend />
+  return <>
+    <SearchFriend />
   </>
 };

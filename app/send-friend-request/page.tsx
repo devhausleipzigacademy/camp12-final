@@ -30,7 +30,7 @@ export default async function FriendPage({
         </div>
         <div className="flex flex-col items-center flex-grow justify-center">
           <h1 className="text-3xl font-bold text-center mb-2">
-            Do you want to become friends{friend.name ? ` with {friend.name}` : ''}?
+            Do you want to become friends{friend ? ` with {friend.name}` : ''}?
           </h1>
         </div>
         <div className="flex items-center justify-center gap-5">
