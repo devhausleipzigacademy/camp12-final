@@ -1,33 +1,35 @@
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 import CreateVenueForm from "./create-venue-form";
+import { BackArrow } from "@/components/BackArrow";
 
 export default async function CreateVenuePage({
-  searchParams,
+	searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] };
+	searchParams: { [key: string]: string | string[] };
 }) {
-  const activityTypes = await prisma.activityType.findMany({});
+	const activityTypes = await prisma.activityType.findMany({});
 
-  const locationString = searchParams.location as string;
+	const locationString = searchParams.location as string;
 
-  const location: number[] = locationString
-    .replace(/[\[\]]/g, "") // Remove square brackets
-    .split(",") // Split into array
-    .map(Number); // Convert each item to a number
-  console.log(location);
+	const location: number[] = locationString
+		.replace(/[\[\]]/g, "") // Remove square brackets
+		.split(",") // Split into array
+		.map(Number); // Convert each item to a number
+	console.log(location);
 
-  return (
-    <div className="m-4">
-      <Link href="/" className="text-2xl ml-2">
-        ←
-      </Link>
-      <section className="flex flex-col items-center gap-3">
-        <h1 className="text-2xl font-bold">Add a venue</h1>
-      </section>
-      <section className="flex flex-col ">
-        <CreateVenueForm activityTypes={activityTypes} location={location} />
-      </section>
-    </div>
-  );
+	return (
+		<div>
+			<div className='grid grid-cols-4 items-center w-full m-6'>
+				<BackArrow variant='link' />
+				<h2 className='text-xl font-bold pb-3 text-left col-span-3'>
+					Add a Venue
+				</h2>
+			</div>
+			<CreateVenueForm
+				activityTypes={activityTypes}
+				location={location}
+			/>
+		</div>
+	);
 }
