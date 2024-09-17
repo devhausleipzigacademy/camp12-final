@@ -7,8 +7,6 @@ export async function GET(req: NextRequest) {
 
   console.log(userIdOne);
   console.log(userIdTwo);
-  
-  
 
   try {
     // Call the addFriend function to add a friend

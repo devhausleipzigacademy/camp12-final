@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import React from "react";
 import { protectPage } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import { sendFriendRequest } from '@/lib/utils/add-friend';
 
 const SearchPage = async ({
   searchParams,
@@ -24,8 +25,6 @@ const SearchPage = async ({
             name: { contains: searchQuery, mode: "insensitive" }
         },
     });
-    
-    console.log(users);
 
     return (
     <div className="container mx-auto p-4">
@@ -49,7 +48,9 @@ const SearchPage = async ({
                 </div>
                 <div>
                   <Link href={`/api/send-friend-request?from=${user.id}&to=${result.id}`}>
-                    <Button>Send Friend Request</Button>
+                    <Button>
+                      Send Friend Request
+                      </Button>
                   </Link>
                 </div>
               </div>
