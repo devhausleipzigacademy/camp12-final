@@ -11,21 +11,23 @@ datasource db {
 }
 
 model User {
-  id                 String    @id
-  googleId           String?   @unique
-  email              String    @unique
+  id                 String          @id
+  googleId           String?         @unique
+  email              String          @unique
   name               String?
   picture            String?
   session            Session[]
-  meetsCreated       Meet[]    @relation("CreatedMeets")
-  meetsParticipating Meet[]    @relation("ParticipatedMeets")
+  meetsCreated       Meet[]          @relation("CreatedMeets")
+  meetsParticipating Meet[]          @relation("ParticipatedMeets")
   badges             Badge[]
-  friends            User[]    @relation("Friends")
-  friendOf           User[]    @relation("Friends")
+  friends            User[]          @relation("Friends")
+  friendOf           User[]          @relation("Friends")
   settings           Settings?
   checkIns           CheckIn[]
-  city               City?     @relation(fields: [cityName], references: [name])
+  city               City?           @relation(fields: [cityName], references: [name])
   cityName           String?
+  FriendRequestsTo   FriendRequest[] @relation("fromUser")
+  FriendRequestsFrom FriendRequest[] @relation("toUser")
 }
 
 model Badge {
@@ -137,4 +139,12 @@ model Report {
 model City {
   name String @unique
   User User[]
+}
+
+model FriendRequest {
+  id         String @id @default(uuid())
+  fromUser   User   @relation("fromUser", fields: [fromUserId], references: [id])
+  fromUserId String
+  toUser     User   @relation("toUser", fields: [toUserId], references: [id])
+  toUserId   String
 }
