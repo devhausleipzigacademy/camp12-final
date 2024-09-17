@@ -138,9 +138,11 @@ export default function MeetForm({
 					<div>
 						<div></div>
 						<div className='flex flex-col gap-4 items-center relative'>
-							<div className='flex w-full justify-center items-center'>
+							<div className='grid grid-cols-[auto_1fr] items-center w-full'>
 								<BackArrow variant='link' />
-								<h2 className='text-xl font-bold pb-3'>Create a Session</h2>
+								<h2 className='text-xl font-bold pb-3 text-center'>
+									Create a Session
+								</h2>
 							</div>
 							{venueId ? (
 								<span className='pb-6'> @ {venueName}</span>

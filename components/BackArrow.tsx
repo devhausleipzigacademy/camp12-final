@@ -13,7 +13,7 @@ export function BackArrow({ variant = "button" }: Props) {
 	return (
 		<button
 			className={cn(
-				"rounded-lg p-2.5 w-full max-w-sm flex flex-col justify-between flex-grow",
+				"absolut flex pb-3 justify-self-start",
 				variant === "button" ? "bg-white/80" : "bg-transparent"
 			)}
 			onClick={() => router.back()}
