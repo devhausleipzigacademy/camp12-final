@@ -15,7 +15,7 @@ export default function WeekDayItem({ text }: Props) {
     <button
       onClick={handleClick}
       className={`p-1 h-8 aspect-square text-xs text-center bg-zinc-200 rounded-full ${
-        isActive ? "bg-blue-200" : ""
+        isActive ? "bg-blue-300" : ""
       }`}
     >
       {text}

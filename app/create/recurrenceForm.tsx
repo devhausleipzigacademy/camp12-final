@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import WeekDayItem from "./weekDayItem";
 import { Input } from "@/components/ui/input";
 import {
@@ -7,13 +8,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -23,26 +21,26 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import * as React from "react";
-
 const weekdays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 const denominator = ["Day", "Week", "Month", "Year"];
 
 export default function RecurrenceForm() {
-  const [date, setDate] = React.useState<Date>();
+  const [date, setDate] = useState<Date | undefined>();
+  const [endOption, setEndOption] = useState("never");
+  const [selectedInterval, setSelectedInterval] = useState("Day");
 
   return (
     <div className="z-10 w-auto h-1/2 bg-white p-4 border-black border-2 rounded-lg flex flex-col gap-2">
       <h1 className="font-bold text-xl text-center">Recurrence settings</h1>
       <div className="flex flex-row gap-2 items-center justify-between">
-        <p>repeat every</p>
+        <p>Repeat every</p>
         <div className="flex flex-row gap-2">
           <Input
             type="recurrence_numerator"
             placeholder="1"
             className="w-12 h-8 text-right"
           />
-          <Select>
+          <Select onValueChange={setSelectedInterval}>
             <SelectTrigger className="w-24 h-8">
               <SelectValue placeholder="Day" />
             </SelectTrigger>
@@ -57,74 +55,72 @@ export default function RecurrenceForm() {
           <p className="px-2">on</p>
         </div>
       </div>
-      <div className="flex flex-row gap-1 align-center justify-between">
-        {weekdays.map((day, index) => {
-          return <WeekDayItem key={index} text={day} />;
-        })}
-      </div>
+      {selectedInterval !== "Day" && (
+        <div className="flex flex-row gap-1 align-center justify-between">
+          {weekdays.map((day, index) => (
+            <WeekDayItem key={index} text={day} />
+          ))}
+        </div>
+      )}
       <p className="my-2">and end</p>
-      <RadioGroup defaultValue="never" className="text-lg flex flex-col gap-4">
-        <div className="flex items-center space-x-2">
+      <RadioGroup
+        defaultValue="never"
+        className="text-lg flex flex-col gap-4"
+        value={endOption}
+        onValueChange={setEndOption}
+      >
+        <div className="flex items-center space-x-2 h-10">
           <RadioGroupItem value="never" id="never" />
           <Label htmlFor="never">Never</Label>
         </div>
 
-        <div className="flex flex-row justify-between  ">
-          <div className="flex space-x-2 items-center">
+        <div className="flex flex-row justify-between">
+          <div className="flex space-x-2 items-center h-10">
             <RadioGroupItem value="at" id="at" />
             <Label htmlFor="at">At</Label>
           </div>
 
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={"outline"}
-                className={cn(
-                  "w-52 justify-start text-left font-normal",
-                  !date && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {date ? format(date, "PPP") : <span>Pick a date</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+          {endOption === "at" && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-52 justify-start text-left font-normal",
+                    !date && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date ? format(date, "PPP") : <span>Pick a date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          )}
         </div>
-        <div className="flex items-center space-x-2 flex-row justify-between  ">
-          <div className="flex space-x-2 items-center">
+
+        <div className="flex items-center space-x-2 flex-row justify-between">
+          <div className="flex space-x-2 items-center h-10">
             <RadioGroupItem value="after" id="after" />
             <Label htmlFor="after">After</Label>
           </div>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={"outline"}
-                className={cn(
-                  "w-52 justify-start text-left font-normal",
-                  !date && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {date ? format(date, "PPP") : <span>Pick a date</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                initialFocus
+          {endOption === "after" && (
+            <div className="flex flex-row gap-2 items-center">
+              <Input
+                type="recurrence_limit"
+                placeholder="3"
+                className="w-12 h-8 text-right"
               />
-            </PopoverContent>
-          </Popover>
+              <p className="text-xs">times</p>
+            </div>
+          )}
         </div>
       </RadioGroup>
 
