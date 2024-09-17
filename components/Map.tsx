@@ -28,6 +28,7 @@ type MapProps = {
   close: () => void;
   updateCrossPos: (pos: LatLngExpression) => void;
   centerUserOnMap: boolean; // New prop to decide if user should be centered
+  onCenterComplete: () => void;
 };
 
 const venueIcon = new L.Icon({
@@ -52,6 +53,17 @@ const meetIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
+const greenIcon = new L.Icon({
+  iconUrl:
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
+  shadowUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+
 export default function Map2({
   openDrawer,
   venues,
@@ -61,6 +73,7 @@ export default function Map2({
   close,
   updateCrossPos,
   centerUserOnMap,
+  onCenterComplete,
 }: MapProps) {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<L.Map | null>(null);
@@ -69,7 +82,7 @@ export default function Map2({
     null
   );
   const userPositionRef = useRef<LatLngExpression | null>(null);
-
+  const userMarker = useRef<L.Marker | null>(null);
   useEffect(() => {
     userPositionRef.current = userPosition;
   }, [userPosition]);
@@ -150,6 +163,38 @@ export default function Map2({
   }, [venues, openMeets, openDrawer, isDrawerOpen, updateCrossPos]);
 
   // Effect to handle user geolocation
+  // useEffect(() => {
+  //   if ("geolocation" in navigator) {
+  //     navigator.geolocation.getCurrentPosition(
+  //       (position) => {
+  //         const { latitude, longitude } = position.coords;
+  //         const userPos: LatLngExpression = [latitude, longitude];
+  //         setUserPosition(userPos);
+  //         setLoading(false);
+
+  //         // Only center the map on the user's position when the crosshair button is clicked
+  //         if (centerUserOnMap && map.current) {
+  //           map.current.setView(userPos, 13);
+  //           L.marker(userPos).addTo(map.current).bindPopup("You are here");
+  //           // setCenterUserOnMap(false); // Reset the flag after centering
+  //         }
+  //       },
+  //       (error) => {
+  //         console.error("Error getting user location:", error);
+  //         setUserPosition([51.3397, 12.3731]); // Fallback to default location
+  //         setLoading(false);
+  //       },
+  //       {
+  //         enableHighAccuracy: true,
+  //         timeout: 5000,
+  //       }
+  //     );
+  //   } else {
+  //     console.error("Geolocation is not supported by this browser");
+  //     setLoading(false);
+  //   }
+  // }, [venues]); // Add `centerUserOnMap` to re-trigger the centering
+
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -157,18 +202,10 @@ export default function Map2({
           const { latitude, longitude } = position.coords;
           const userPos: LatLngExpression = [latitude, longitude];
           setUserPosition(userPos);
-          setLoading(false);
-          // Only center the map on the user's position when the crosshair button is clicked
-          if (centerUserOnMap && map.current) {
-            map.current.setView(userPos, 13);
-            L.marker(userPos).addTo(map.current).bindPopup("You are here");
-            // setCenterUserOnMap(false); // Reset the flag after centering
-          }
         },
         (error) => {
           console.error("Error getting user location:", error);
           setUserPosition([51.3397, 12.3731]); // Fallback to default location
-          setLoading(false);
         },
         {
           enableHighAccuracy: true,
@@ -177,9 +214,27 @@ export default function Map2({
       );
     } else {
       console.error("Geolocation is not supported by this browser");
-      setLoading(false);
     }
-  }, [venues]); // Add `centerUserOnMap` to re-trigger the centering
+  }, []); // Empty dependency array means this runs once on mount
+
+  // New effect to handle centering on user position
+  useEffect(() => {
+    if (centerUserOnMap && map.current && userPosition) {
+      map.current.setView(userPosition, 13);
+
+      if (userMarker.current) {
+        userMarker.current.remove();
+      }
+
+      // Add new green marker for user position
+      userMarker.current = L.marker(userPosition, { icon: greenIcon })
+        .addTo(map.current)
+        .bindPopup("You are here")
+        .openPopup();
+      // L.marker(userPosition,).addTo(map.current).bindPopup("You are here");
+      onCenterComplete(); // Call this to reset the centerUserOnMap state
+    }
+  }, [centerUserOnMap, userPosition, onCenterComplete]);
 
   return (
     <div ref={mapContainer} className="h-screen w-screen absolute">

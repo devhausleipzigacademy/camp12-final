@@ -35,7 +35,10 @@ export default function MapAndDrawer({
 const [centerUserOnMap, setCenterUserOnMap] = useState(false);
 
 const toggleCross = () => setCrossVisible((prev) => !prev);
-const toggleCenter = () => setCenterUserOnMap((prev) => !prev);
+const centerOnClick = () => setCenterUserOnMap(true);
+const handleCenterComplete = () => {
+  setCenterUserOnMap(false);
+};
 const close = () => setCrossVisible(false);
 const updateCrossPos = (pos: LatLngExpression) => setCrossPos(pos);
 
@@ -55,6 +58,7 @@ return (
       isDrawerOpen={isDrawerOpen}
       updateCrossPos={updateCrossPos}
       centerUserOnMap={centerUserOnMap}
+      onCenterComplete={handleCenterComplete}
     />
     <DrawerHompage
       isOpen={isDrawerOpen}
@@ -66,7 +70,7 @@ return (
       userPariticpatingMeets={userPariticpatingMeets}
       isDrawerOpen={isDrawerOpen}
       toggleCross={toggleCross}
-      toggleCenter={toggleCenter}
+      centerOnClick={centerOnClick}
     />
   </div>
 );
