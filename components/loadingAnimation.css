@@ -1,0 +1,19 @@
+.toBeAnimated {
+  transform: translateY(100px); /* Startposition */
+  animation: bounce 1s cubic-bezier(0, 0, 0, 1) infinite;
+}
+
+@keyframes bounce {
+  0% {
+    transform: translateY(100px) scale(1, 0.8); /* Auf dem Boden */
+  }
+  50% {
+    transform: translateY(-100px) scale(1, 1); /* Sprunghöhe */
+  }
+  60% {
+    transform: translateY(0px) scale(1, 1); /* Sprunghöhe */
+  }
+  100% {
+    transform: translateY(100px) scale(1, 0.8); /* Zurück auf dem Boden */
+  }
+}

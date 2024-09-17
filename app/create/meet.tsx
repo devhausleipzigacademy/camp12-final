@@ -99,6 +99,11 @@ export default function MeetForm({
     control: form.control,
     name: "time",
   });
+  /*   const recurring = useWatch({
+    control: form.control,
+    name: "recurring",
+    defaultValue: false,
+  }); */
 
   let activityType = useWatch({
     control: form.control,

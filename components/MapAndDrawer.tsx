@@ -9,6 +9,7 @@ import Navbar from "./Navbar";
 import { UserCreatedMeet, UserParticipatingMeet } from "@/lib/utils/getMeets";
 import { LatLngExpression } from "leaflet";
 import { useRouter } from "next/navigation";
+import LoadingAnimation from "./loadingAnimation";
 
 export default function MapAndDrawer({
   venues,
@@ -25,7 +26,9 @@ export default function MapAndDrawer({
   const Map = useMemo(
     () =>
       dynamic(() => import("@/components/Map"), {
-        loading: () => <p className="p-40 text-center">A map is loading</p>,
+        /*         loading: () => <p className="p-40 text-center">A map is loading</p>,
+         */
+        loading: () => <LoadingAnimation />,
         ssr: false,
       }),
     []
