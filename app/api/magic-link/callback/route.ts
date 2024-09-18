@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const state = url.searchParams.get("state") as string;
   const email = url.searchParams.get("email") as string;
+  const intendedPath = cookies().get("location")?.value || "/";
 
   if (!state) {
     return NextResponse.json({ error: "State is required" }, { status: 400 });
@@ -61,10 +62,5 @@ export async function GET(request: NextRequest) {
   );
 
   // Respond with a success message or redirect
-  return new Response(null, {
-    status: 302,
-    headers: {
-      Location: "/protected",
-    },
-  });
+  return NextResponse.redirect(new URL(intendedPath, request.url), 302);
 }

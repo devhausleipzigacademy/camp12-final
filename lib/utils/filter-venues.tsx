@@ -16,6 +16,13 @@ export function filterVenues(
         (at) => at.name.toLowerCase() === filters.activity?.toLowerCase()
       );
     }
+
+    if (filters.mode) {
+      return venue.meets.some(
+        (meet) => meet.mode.toLowerCase() === filters.mode?.toLowerCase()
+      );
+    }
+
     function isMeetNow(meet: Meet) {
       const meetDate = new Date(meet.date);
       const [hours, minutes] = meet.time.split(":").map(Number);
@@ -78,13 +85,7 @@ export function filterVenues(
         return true;
       else return false;
     }
-    if (filters.competitive === "both") return true;
-    if (filters.competitive === "yes") {
-      return venue.meets.some((meet) => meet.competitive);
-    }
-    if (filters.competitive === "no") {
-      return venue.meets.some((meet) => !meet.competitive);
-    }
+
     return true;
   });
 }

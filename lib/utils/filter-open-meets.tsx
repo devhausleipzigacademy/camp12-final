@@ -17,6 +17,9 @@ export function filterOpenMeets(
         filters.activity?.toLowerCase()
       );
     }
+    if (filters.mode) {
+      return openMeet.mode.toLowerCase() === filters.mode?.toLowerCase();
+    }
     function isMeetNow(meet: Meet) {
       const meetDate = new Date(meet.date);
       const [hours, minutes] = meet.time.split(":").map(Number);
@@ -71,19 +74,19 @@ export function filterOpenMeets(
       else return false;
     }
 
-    if (filters.status === "joinToday") {
-      if (isMeetPlanned(openMeet) && openMeet.isPublic) return true;
-      else return false;
-    }
-    if (filters.competitive === "both") return true;
-    if (filters.competitive === "yes") {
-      if (openMeet.competitive) return true;
-      else return false;
-    }
-    if (filters.competitive === "no") {
-      if (!openMeet.competitive) return true;
-      else return false;
-    }
+    // if (filters.status === "joinToday") {
+    //   if (isMeetPlanned(openMeet) && openMeet.isPublic) return true;
+    //   else return false;
+    // }
+    // if (filters.mode === "casual") return true;
+    // if (filters.mode === "competetive") {
+    //   if (openMeet.mode) return true;
+    //   else return false;
+    // }
+    // if (filters.mode === "softie") {
+    //   if (!openMeet.mode) return true;
+    //   else return false;
+    // }
     return true;
   });
 }

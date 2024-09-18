@@ -28,6 +28,7 @@ import Filter from "@/components/Filter";
 import { Filters } from "@/lib/utils/types";
 import { ActivityType } from "@prisma/client";
 
+
 // const activities = [
 //   "tennis",
 //   "table tennis",
@@ -48,8 +49,7 @@ export function FilterDrawer({ activities }: { activities: ActivityType[] }) {
   const router = useRouter();
   const [activity, setActivity] = useState<string | undefined>();
   const [status, setStatus] = useState<string | undefined>();
-  const [excludeCompetitive, setExcludeCompetitive] = useState(true);
-  const [isCompetitive, setIsCompetitive] = useState(false);
+  const [mode, setMode] = useState<string | undefined>("");
   const [isSelectOpen, setIsSelectOpen] = useState(false);
 
   function addFilters() {
@@ -60,14 +60,9 @@ export function FilterDrawer({ activities }: { activities: ActivityType[] }) {
     if (status) {
       filters.status = status;
     }
-    if (excludeCompetitive) {
-      filters.competitive = "both";
-    }
-    if (!excludeCompetitive && isCompetitive) {
-      filters.competitive = "yes";
-    }
-    if (!excludeCompetitive && !isCompetitive) {
-      filters.competitive = "no";
+
+    if (mode) {
+      filters.mode = mode;
     }
 
     return filters;
@@ -81,11 +76,10 @@ export function FilterDrawer({ activities }: { activities: ActivityType[] }) {
   function resetFilters() {
     setActivity(undefined);
     setStatus(undefined);
-    setExcludeCompetitive(true);
-    setIsCompetitive(false);
+    setMode(undefined);
 
     router.push("/");
-    window.location.href = "/";
+    //  window.location.href = "/";
   }
 
   // function handleApplyFilters() {
@@ -93,13 +87,13 @@ export function FilterDrawer({ activities }: { activities: ActivityType[] }) {
   //   window.location.href = fullUrl;
   // }
 
-  function handleApplyFilters() {
+  async function handleApplyFilters() {
     // Construct the full URL with the query parameters
     const fullUrl = `${window.location.origin}${url}`;
 
     // Force a page reload with the updated URL
-    router.push(fullUrl);
-    // window.location.href = fullUrl;
+
+    window.location.href = fullUrl;
   }
   return (
     <>
@@ -118,7 +112,7 @@ export function FilterDrawer({ activities }: { activities: ActivityType[] }) {
             <h2>Activity</h2>
             <Select onValueChange={setActivity} onOpenChange={setIsSelectOpen}>
               <SelectTrigger className="text-base">
-                <SelectValue placeholder="all activities" />
+                <SelectValue placeholder="All Activities" />
               </SelectTrigger>
               <SelectContent className="bg-white p-3 z-[9999] pointer-events-auto">
                 <SelectGroup>
@@ -126,7 +120,7 @@ export function FilterDrawer({ activities }: { activities: ActivityType[] }) {
                     <SelectItem
                       className="text-base"
                       key={activity.id}
-                      value={activity.id}
+                      value={activity.name}
                     >
                       {activity.name}
                     </SelectItem>
@@ -134,12 +128,33 @@ export function FilterDrawer({ activities }: { activities: ActivityType[] }) {
                 </SelectGroup>
               </SelectContent>
             </Select>
+            {/* Competetive/Casual/Softie */}
+            <div className="text-base flex justify-between items-center gap-1">
+              <Select onValueChange={setMode} onOpenChange={setIsSelectOpen}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue className="text-base" placeholder="Level" />
+                </SelectTrigger>
+                <SelectContent className="bg-white p-3 z-[9999] pointer-events-auto">
+                  <SelectItem className="text-base" value="softie">
+                    Softie
+                  </SelectItem>
+                  <SelectItem className="text-base" value="casual">
+                    Casual
+                  </SelectItem>
+                  <SelectItem className="text-base" value="competitive">
+                    Competitive
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <h2>Status</h2>
             <RadioGroup
               defaultValue="option-one"
-              className={` flex justify-between ${
-                isSelectOpen ? "hidden" : ""
-              } `}
+              disabled={isSelectOpen}
+              // className={` flex justify-between ${
+              //   isSelectOpen ? "hidden" : ""
+              // } `}
+              className="flex justify-between"
               onValueChange={setStatus}
             >
               <div className="flex flex-col w-1/2 pr-5 gap-1">
@@ -171,37 +186,18 @@ export function FilterDrawer({ activities }: { activities: ActivityType[] }) {
                 </div>
               </div>
             </RadioGroup>
-            <div className="flex justify-between items-center gap-1">
-              <h2
-                className={`${
-                  excludeCompetitive ? "text-muted-foreground" : "text-primary"
-                }`}
-              >
-                Competitive
-              </h2>
-              <Switch
-                onCheckedChange={setIsCompetitive}
-                disabled={excludeCompetitive}
-              />
-
-              <h2 className="pl-4">show both</h2>
-              <Checkbox
-                id="excludeCompetitive"
-                checked={excludeCompetitive}
-                onCheckedChange={(checked) => {
-                  setExcludeCompetitive(checked as boolean);
-                  if (!checked) {
-                    setIsCompetitive(false);
-                  }
-                }}
-              />
-            </div>
           </div>
           <DrawerFooter>
-            <DrawerClose asChild>
-              <Button onClick={handleApplyFilters}>Apply Filters</Button>
-            </DrawerClose>
-            <Button onClick={resetFilters}>Reset</Button>
+            <div className="flex gap-10">
+              <DrawerClose asChild>
+                <Button onClick={handleApplyFilters} disabled={isSelectOpen}>
+                  Apply Filters
+                </Button>
+              </DrawerClose>
+              <Button onClick={resetFilters} disabled={isSelectOpen}>
+                Reset
+              </Button>
+            </div>
           </DrawerFooter>
         </DrawerContent>
       </Drawer>

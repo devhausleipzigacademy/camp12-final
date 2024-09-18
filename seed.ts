@@ -2,17 +2,21 @@ import { prisma } from "./lib/db";
 import { generateIdFromEntropySize } from "lucia";
 
 async function main() {
-  // Fetch venue IDs dynamically
-
   console.log("Cleaning Database...");
 
-  await prisma.user.deleteMany();
-  await prisma.activityType.deleteMany();
-  await prisma.tag.deleteMany();
+  // Delete data in the correct order to avoid foreign key constraint errors
+  await prisma.response.deleteMany();
+  await prisma.meet.deleteMany();
+  await prisma.report.deleteMany();
   await prisma.badge.deleteMany();
   await prisma.meet.deleteMany();
   await prisma.city.deleteMany();
+  await prisma.tag.deleteMany();
   await prisma.venue.deleteMany();
+  await prisma.activityType.deleteMany();
+  await prisma.settings.deleteMany();
+  await prisma.user.deleteMany();
+  await prisma.city.deleteMany();
 
   console.log("Cleaning Database finished");
 
@@ -40,6 +44,7 @@ async function main() {
       requiredNumberOfParticipants: 1,
     },
   });
+
   const boule = await prisma.activityType.create({
     data: {
       name: "Boule",
@@ -102,6 +107,7 @@ async function main() {
       },
     },
   });
+
   const bouleBahnBerlin = await prisma.venue.create({
     data: {
       name: "Boule Bahn Berlin",
@@ -110,7 +116,6 @@ async function main() {
       address: "Boule Bahn Berlin 12 in 161 Leipzig",
       location: [51.320008587211, 12.337681353092],
       image: "/example.png",
-      description: "here you can toss metal balls quite smoothly",
       activityTypes: {
         connect: {
           id: boule.id,
@@ -187,15 +192,16 @@ async function main() {
   });
 
   // Tags
-  await prisma.tag.create({ data: { name: "Outdoor" } });
-  await prisma.tag.create({ data: { name: "Indoor" } });
+  await prisma.tag.create({ data: { name: "public ground" } });
+  await prisma.tag.create({ data: { name: "wheelchair-accessible" } });
   await prisma.tag.create({ data: { name: "Relaxing" } });
   await prisma.tag.create({ data: { name: "Friendly Neighborhood" } });
   await prisma.tag.create({ data: { name: "Dogs around" } });
-  await prisma.tag.create({ data: { name: "Nice ground" } });
+  await prisma.tag.create({ data: { name: "illuminated at night" } });
+  await prisma.tag.create({ data: { name: "sheltered" } });
 
   // Meets
-  await prisma.meet.create({
+  const meet1 = await prisma.meet.create({
     data: {
       date: new Date("2024-08-29"),
       time: "14:00",
@@ -203,16 +209,18 @@ async function main() {
       isPublic: false,
       creatorId: user1.id,
       participants: { connect: [{ id: user2.id }, { id: user3.id }] },
-      guests: 2,
+      groupSize: 2,
       notes: "Freundliches Basketballspiel",
-      tags: { connect: [{ name: "Outdoor" }] },
+      tags: { connect: [{ name: "Relaxing" }] },
       venueId: weisseElster.id,
       activityTypeId: basketball.id,
       competitive: true,
+      mode: "softie",
+      isRecurring: false,
     },
   });
 
-  await prisma.meet.create({
+  const meet2 = await prisma.meet.create({
     data: {
       date: new Date("2024-09-20"),
       time: "10:00",
@@ -220,14 +228,16 @@ async function main() {
       isPublic: true,
       creatorId: user2.id,
       participants: { connect: [{ id: user1.id }] },
-      guests: 1,
+      groupSize: 1,
       notes: "Tennistraining",
-      tags: { connect: [{ name: "Outdoor" }] },
+      tags: { connect: [{ name: "Relaxing" }] },
       venueId: beachClubCossi.id,
       activityTypeId: tennis.id,
-      competitive: false,
+      mode: "softie",
+      address: "Beach Club Cossi",
     },
   });
+  // 2
   await prisma.meet.create({
     data: {
       date: new Date("2024-09-20"),
@@ -236,13 +246,16 @@ async function main() {
       isPublic: false,
       creatorId: user2.id,
       participants: { connect: [{ id: user1.id }, { id: user2.id }] },
-      guests: 3,
+      groupSize: 3,
       notes: "juhu boule",
-      tags: { connect: [{ name: "Outdoor" }] },
+      tags: { connect: [{ name: "Relaxing" }] },
       venueId: bouleBahnBerlin.id,
       activityTypeId: boule.id,
+      address: "Leiser Weg 2 in 1621 Leipzig",
+      mode: "casual",
     },
   });
+  //  3
   await prisma.meet.create({
     data: {
       date: new Date("2024-09-20"),
@@ -251,14 +264,16 @@ async function main() {
       isPublic: true,
       creatorId: user2.id,
       participants: { connect: [{ id: user1.id }] },
-      guests: 1,
+      groupSize: 1,
       notes: "yogimogi",
-      tags: { connect: [{ name: "Outdoor" }] },
+      tags: { connect: [{ name: "Relaxing" }] },
       venueId: musselGym.id,
       activityTypeId: yoga.id,
+      address: "FCKAFD-Weg 2 in 161 Leipzig",
+      mode: "softie",
     },
   });
-
+  // 5
   await prisma.meet.create({
     data: {
       date: new Date("2024-09-20"),
@@ -267,14 +282,16 @@ async function main() {
       isPublic: true,
       creatorId: user2.id,
       participants: { connect: [{ id: user1.id }, { id: user2.id }] },
-      guests: 3,
+      groupSize: 3,
       notes: "spontaneous tennis",
-      tags: { connect: [{ name: "Outdoor" }] },
+      tags: { connect: [{ name: "Relaxing" }] },
       activityTypeId: tennis.id,
       location: [51.328261109658, 12.361901700496],
-      address: "FCKAFD-Weg 2 in 161 Leipzig",
+      address: "Lauter Weg 3 in 1621 Leipzig",
+      mode: "softie",
     },
   });
+  // 6
   await prisma.meet.create({
     data: {
       date: new Date("2024-08-20"),
@@ -283,14 +300,16 @@ async function main() {
       isPublic: true,
       creatorId: user2.id,
       participants: { connect: [{ id: user1.id }] },
-      guests: 1,
+      groupSize: 1,
       notes: "yogimogi2",
-      tags: { connect: [{ name: "Outdoor" }] },
+      tags: { connect: [{ name: "Relaxing" }] },
       activityTypeId: yoga.id,
       location: [51.312818371408, 12.379196584224],
-      address: "Bernd-Höcke-ist-ein-Nazi-Weg 8 in 161 Leipzig",
+      address: "Lieber Weg 13 in 16221 Leipzig",
+      mode: "softie",
     },
   });
+  // 7
   await prisma.meet.create({
     data: {
       date: new Date("2024-09-20"),
@@ -299,15 +318,16 @@ async function main() {
       isPublic: true,
       creatorId: user2.id,
       participants: { connect: [{ id: user1.id }] },
-      guests: 1,
+      groupSize: 1,
       notes: "free&competitiveboule",
-      tags: { connect: [{ name: "Outdoor" }] },
+      tags: { connect: [{ name: "Relaxing" }] },
       activityTypeId: boule.id,
       location: [51.333365079861, 12.402499616146],
-      competitive: true,
-      address: "Notarealname Straße 12 in 161 Leipzig",
+      address: "Roeckelstraße 2, 1621 Leipzig",
+      mode: "softie",
     },
   });
+  // 8
   await prisma.meet.create({
     data: {
       date: new Date("2024-09-21"),
@@ -316,15 +336,16 @@ async function main() {
       isPublic: true,
       creatorId: user2.id,
       participants: { connect: [{ id: user1.id }, { id: user2.id }] },
-      guests: 5,
+      groupSize: 5,
       notes: "ballintomorrow",
-      tags: { connect: [{ name: "Outdoor" }] },
+      tags: { connect: [{ name: "Relaxing" }] },
       activityTypeId: basketball.id,
       location: [51.298389433094, 12.3746411875],
-      competitive: false,
-      address: "Karl-Pups-Straße 12 in 161 Leipzig",
+      address: "Zionstraße 13, 1621 Leipzig",
+      mode: "casual",
     },
   });
+  // 9
   await prisma.meet.create({
     data: {
       date: new Date("2024-09-20"),
@@ -333,13 +354,14 @@ async function main() {
       isPublic: true,
       creatorId: user2.id,
       participants: { connect: [{ id: user1.id }, { id: user2.id }] },
-      guests: 5,
+      groupSize: 5,
       notes: "ballineasily",
-      tags: { connect: [{ name: "Outdoor" }] },
+      tags: { connect: [{ name: "Relaxing" }] },
       activityTypeId: basketball.id,
       location: [51.333132141369, 12.335911095141],
       competitive: false,
       address: "Ballalala 12 in 161 Leipzig",
+      mode: "softie",
     },
   });
 
@@ -352,16 +374,17 @@ async function main() {
       isPublic: false,
       creatorId: user1.id,
       participants: { connect: [{ id: user2.id }, { id: user3.id }] },
-      guests: 2,
+      groupSize: 2,
       notes: "Freundliches Basketballspiel",
-      tags: { connect: [{ name: "Outdoor" }] },
+      tags: { connect: [{ name: "Relaxing" }] },
       venueId: weisseElster.id,
       activityTypeId: basketball.id,
-      isCompetitive: false,
       isRecurring: false,
+      address: "Brandstraße 2, 1621 Leipzig",
+      mode: "softie",
     },
   });
-
+  // 10
   await prisma.meet.create({
     data: {
       date: new Date("2024-09-20"),
@@ -370,13 +393,14 @@ async function main() {
       isPublic: true,
       creatorId: user2.id,
       participants: { connect: [{ id: user1.id }] },
-      guests: 2,
+      groupSize: 2,
       notes: "Tennistraining",
-      tags: { connect: [{ name: "Outdoor" }] },
+      tags: { connect: [{ name: "Relaxing" }] },
       venueId: beachClubCossi.id,
       activityTypeId: tennis.id,
-      isCompetitive: false,
+      competitive: false,
       isRecurring: false,
+      mode: "softie",
     },
   });
 
@@ -388,29 +412,32 @@ async function main() {
       isPublic: false,
       creatorId: user3.id,
       participants: { connect: [{ id: user1.id }, { id: user2.id }] },
-      guests: 2,
+      groupSize: 2,
       notes: "Tennistraining",
-      tags: { connect: [{ name: "Outdoor" }] },
+      tags: { connect: [{ name: "Relaxing" }] },
       venueId: beachClubCossi.id,
       activityTypeId: tennis.id,
-      isCompetitive: false,
       isRecurring: false,
+      address: "Kurt-Eisner-Straße 2, 1621 Leipzig",
+      mode: "competitive",
     },
   });
+  // 11
   await prisma.meet.create({
     data: {
-      date: new Date("2024-09-10"),
+      date: new Date("2024-10-03"),
       time: "16:00",
       duration: 2,
       isPublic: true,
       creatorId: user1.id,
       participants: { connect: [{ id: user2.id }, { id: user3.id }] },
-      guests: 2,
+      groupSize: 2,
       notes: "Freundliches Basketballspiel",
-      tags: { connect: [{ name: "Outdoor" }] },
+      tags: { connect: [{ name: "Relaxing" }] },
       venueId: weisseElster.id,
       activityTypeId: basketball.id,
-      isCompetitive: false,
+      competitive: false,
+      mode: "softie",
       isRecurring: false,
     },
   });
@@ -423,13 +450,15 @@ async function main() {
       isPublic: false,
       creatorId: user2.id,
       participants: { connect: [{ id: user3.id }] },
-      guests: 2,
+      groupSize: 2,
       notes: "Freundliches Basketballspiel",
-      tags: { connect: [{ name: "Outdoor" }] },
+      tags: { connect: [{ name: "Relaxing" }] },
       venueId: musselGym.id,
       activityTypeId: tennis.id,
-      isCompetitive: false,
+      competitive: false,
       isRecurring: false,
+      address: "Roeckelstraße 21, 1621 Leipzig",
+      mode: "casual",
     },
   });
 
@@ -484,34 +513,36 @@ async function main() {
     },
   });
 
-  await prisma.report.create({
+  // ... (create other reports similarly)
+
+  // Responses
+  console.log("Creating responses...");
+
+  await prisma.response.create({
     data: {
-      issue: "Hygieneproblem",
-      date: new Date("2024-08-15"),
-      time: "09:00",
-      detail: "Die Umkleidekabinen müssen gründlich gereinigt werden",
-      venueId: musselGym.id,
+      meetId: meet1.id,
+      userId: user2.id,
+      status: "accepted",
     },
   });
 
-  await prisma.report.create({
+  await prisma.response.create({
     data: {
-      issue: "unschön",
-      date: new Date("2024-08-20"),
-      time: "11:00",
-      detail: "Ist üble Yuppiescheisse hier",
-      venueId: beachClubCossi.id,
+      meetId: meet2.id,
+      userId: user1.id,
+      status: "pending",
     },
   });
+
+  // ... (create other responses similarly)
 
   console.log("Seed-Daten erfolgreich eingefügt");
 }
 
-
-// getting an error message for await main 
+// getting an error message for await main
 // Top-level 'await' expressions are only allowed when the 'module' option is set to 'es2022', 'esnext', 'system', 'node16', 'nodenext', or 'preserve', and the 'target' option is set to 'es2017' or higher.ts(1378)
 
-await main()
+main()
   .catch((e) => {
     console.error(e);
   })

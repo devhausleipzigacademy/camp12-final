@@ -23,6 +23,7 @@ import { useState } from "react";
 
 type Props = {
   suggestions: Tag[];
+  //this should be called selected
   value: string[];
   setValue: React.Dispatch<React.SetStateAction<string[]>>;
 };
@@ -92,9 +93,9 @@ export function TagInput({ suggestions, value, setValue }: Props) {
             onInput={handleInputChange}
           />
           <CommandList>
-            <CommandEmpty>
+            {/* <CommandEmpty>
               <Button onClick={handleButtonClick}>{"Add a new Tag"}</Button>
-            </CommandEmpty>
+            </CommandEmpty> */}
             <CommandGroup className="flex justify-center items-center gap-2">
               {suggestions.map((suggestion) => (
                 <CommandItem

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { FcGoogle } from "react-icons/fc";
 import React from "react";
 import Link from "next/link";
+import { cookies } from "next/headers";
 
 export default function Login() {
   return (

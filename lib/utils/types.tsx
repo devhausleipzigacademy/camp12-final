@@ -3,7 +3,8 @@ import { Meet as PrismaMeet, Venue as PrismaVenue } from "@prisma/client";
 export type Filters = {
   activity?: string;
   status?: string;
-  competitive?: "yes" | "no" | "both";
+  // mode?: "softie" | "casual" | "competetive" | undefined;
+  mode?: string;
 };
 
 export type Venue = PrismaVenue & {

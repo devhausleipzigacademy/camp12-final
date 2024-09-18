@@ -11,21 +11,22 @@ datasource db {
 }
 
 model User {
-  id                 String    @id
-  googleId           String?   @unique
-  email              String    @unique
+  id                 String     @id
+  googleId           String?    @unique
+  email              String     @unique
   name               String?
   picture            String?
   session            Session[]
-  meetsCreated       Meet[]    @relation("CreatedMeets")
-  meetsParticipating Meet[]    @relation("ParticipatedMeets")
+  meetsCreated       Meet[]     @relation("CreatedMeets")
+  meetsParticipating Meet[]     @relation("ParticipatedMeets")
   badges             Badge[]
-  friends            User[]    @relation("Friends")
-  friendOf           User[]    @relation("Friends")
+  friends            User[]     @relation("Friends")
+  friendOf           User[]     @relation("Friends")
   settings           Settings?
   checkIns           CheckIn[]
-  city               City?     @relation(fields: [cityName], references: [name])
+  city               City?      @relation(fields: [cityName], references: [name])
   cityName           String?
+  responses          Response[]
 }
 
 model Badge {
@@ -44,9 +45,10 @@ model Session {
 }
 
 model Tag {
-  name          String         @id @unique
+  // A name as identifier is totally fine. only if you want to have two tags with the same name butt different attributes, you need an id
+  name          String         @id @default(uuid())
   venues        Venue[]
-  meets         Meet[]         @relation(name: "TagtoMeet")
+  meets         Meet[]         @relation("TagsOnMeets")
   activityTypes ActivityType[]
 }
 
@@ -64,27 +66,40 @@ model Venue {
 }
 
 model Meet {
-  id             String       @id @default(uuid())
+id             String       @id @default(uuid())
   date           DateTime
   time           String
-  isCompetitive  Boolean      @default(false)
+  mode           String
   isRecurring    Boolean      @default(false)
   duration       Float
   isPublic       Boolean      @default(false)
   creatorId      String
   creator        User         @relation("CreatedMeets", fields: [creatorId], references: [id], onDelete: Cascade)
   participants   User[]       @relation("ParticipatedMeets")
-  guests         Int
+  guests         String[]     @default([])
+  groupSize      Int
   notes          String?
   equipment      String?
   venue          Venue?       @relation(fields: [venueId], references: [id], onDelete: Cascade)
   venueId        String?
-  address        String? // New field for storing address if no venue is selected
   location       Float[]
   activityType   ActivityType @relation(fields: [activityTypeId], references: [id])
   activityTypeId String
   competitive    Boolean?
-  tags           Tag[]        @relation(name: "TagtoMeet")
+  tags           Tag[]        @relation("TagsOnMeets")
+  address        String?
+  Response       Response[]
+}
+
+model Response {
+  id        String   @id @default(uuid())
+  meet      Meet     @relation(fields: [meetId], references: [id])
+  meetId    String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model CheckIn {
@@ -104,7 +119,7 @@ model ActivityType {
   description                  String?
   requiredNumberOfParticipants Int
   meets                        Meet[]
-  tags                         Tag[]
+  tags          Tag[]
   venues                       Venue[]
 
   CheckIn CheckIn[]

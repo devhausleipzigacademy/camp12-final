@@ -10,7 +10,7 @@ export const meetSchema = z.object({
   }),
   duration: z.number(),
   // change participants to guests
-  guests: z.string(),
+  groupSize: z.string(),
   recurring: z.boolean(),
   equipment: z.string().trim().optional(),
   description: z.string().trim().optional(),

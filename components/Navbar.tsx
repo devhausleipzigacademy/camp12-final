@@ -4,16 +4,23 @@ import Link from "next/link";
 import { FaCirclePlus, FaUser } from "react-icons/fa6";
 import { FaLocationCrosshairs } from "react-icons/fa6";
 import { DrawerUpComingSessions } from "./DrawerUpComingSessions";
-import { UserCreatedMeet, UserParticipatingMeet } from "@/lib/utils/getMeets";
+import {
+  AllMeet,
+  UserCreatedMeet,
+  UserParticipatingMeet,
+} from "@/lib/utils/getMeets";
 import { DrawerCreateVenue } from "./DrawerCreateVenue";
 import { cn } from "@/lib/utils";
 import { FaTableTennis } from "react-icons/fa";
+import { Meet, User } from "@prisma/client";
 
 type Props = {
   userCreatedMeets: UserCreatedMeet[];
   userPariticpatingMeets: UserParticipatingMeet[];
   isDrawerOpen: boolean;
   toggleCross: () => void;
+  meets: AllMeet[];
+  user: User;
 };
 
 export default function Navbar({
@@ -21,6 +28,8 @@ export default function Navbar({
   userPariticpatingMeets,
   isDrawerOpen,
   toggleCross,
+  meets,
+  user,
 }: Props) {
   return (
     <nav
@@ -30,7 +39,7 @@ export default function Navbar({
         isDrawerOpen ? "hidden" : "flex" // This class is conditionally applied when isDrawerOpen is true
       )}
     >
-      <DrawerUpComingSessions defaultTab="near-me">
+      <DrawerUpComingSessions meets={meets} user={user} defaultTab="near-me">
         <FaTableTennis className="size-8 fill-white" />
       </DrawerUpComingSessions>
       <FaLocationCrosshairs className="size-8 fill-white" />

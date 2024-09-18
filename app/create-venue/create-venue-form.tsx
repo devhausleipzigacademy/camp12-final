@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-import { createVenue, reportVenue } from "@/actions/venues";
+import { createVenue } from "@/actions/venues";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -26,7 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ActivityType } from "@prisma/client";
+import { ActivityType, Tag } from "@prisma/client";
 import Link from "next/link";
 
 const formSchema = z.object({
@@ -39,6 +39,7 @@ const formSchema = z.object({
   location: z
     .array(z.number())
     .min(2, "location will be inserted automatically"),
+  tags: z.array(z.string()), // Optional, defaults to an empty array
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -46,13 +47,19 @@ type FormData = z.infer<typeof formSchema>;
 export default function CreateVenueForm({
   activityTypes,
   location,
+  tags,
+  address
 }: {
   activityTypes: ActivityType[];
   location: number[];
+  tags: Tag[];
+  address: string;
 }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  console.log("inside create venue form");
 
+  console.log(tags);
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -60,6 +67,7 @@ export default function CreateVenueForm({
       activityTypes: [],
       image: "/signin-hero.jpg",
       location: [],
+      tags: [],
     },
   });
 
@@ -75,13 +83,20 @@ export default function CreateVenueForm({
         data.activityTypes,
         data.location,
         data.image || "",
-        data.description || ""
+        data.description || "",
+        data.tags || [],
+        address || ""
       );
-      console.log("Report submitted successfully:", result);
-      router.push("/");
+      console.log("Venue created successfully:", result);
+      if (result && result.id) {
+        router.push(`venue-detail/${result.id}`);
+      } else {
+        setError("Venue created but ID not returned.");
+        router.push("/");
+      }
     } catch (error) {
-      console.error("Error submitting report:", error);
-      setError("Failed to submit report. Please try again.");
+      console.error("Error creating venue:", error);
+      setError("Failed to create venue. Please try again.");
     }
   };
 
@@ -170,6 +185,48 @@ export default function CreateVenueForm({
                   className="h-20"
                   {...field}
                 />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="tags"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tags</FormLabel>
+              <FormControl>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline">
+                      {" "}
+                      {field.value.length > 0
+                        ? `${field.value.length} selected`
+                        : "Select a tag"}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    <DropdownMenuLabel>Tags</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+
+                    {tags.map((tag) => (
+                      <DropdownMenuCheckboxItem
+                        key={tag.name}
+                        checked={field.value.includes(tag.name)}
+                        onCheckedChange={(checked) => {
+                          const updatedValue = checked
+                            ? [...field.value, tag.name]
+                            : field.value.filter((name) => name !== tag.name);
+                          field.onChange(updatedValue);
+                        }}
+                      >
+                        {tag.name}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </FormControl>
               <FormMessage />
             </FormItem>

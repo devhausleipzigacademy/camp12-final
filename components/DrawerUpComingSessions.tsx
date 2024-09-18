@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import { FaTableTennis } from "react-icons/fa";
 import { InteractionBar } from "./InteractionBar";
 import {
@@ -8,7 +9,6 @@ import {
   CardDescription,
   CardContent,
 } from "./ui/card";
-
 import {
   Drawer,
   DrawerPortal,
@@ -21,101 +21,119 @@ import {
   DrawerTitle,
   DrawerDescription,
 } from "./ui/drawer";
-
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 import { Button } from "./ui/button";
+import { AllMeet, getAllMeets } from "@/lib/utils/getMeets";
+import { Meet, User } from "@prisma/client";
 
-const userId = "234";
-const meets = [
-  {
-    title: "Pingpong",
-    address: "Erich Zeigner Allee",
-    date: "28.08.2024",
-    time: "3:00 PM",
-    img: "../public/DolliBu-Wild-Elephant-Unicorn-Plush-Stuffed-Animal-Toy-Super-Soft-Elephantcorn-Dress-Up-Removable-Outfit-Cute-Fantasy-Wildlife-Gift-12-Inch_b81bd1b7-ab9c-47a4-b273-8899acf69d63.3a2eef36493668f5b4e5d133e2559c3b.webp",
-    creatorId: "234",
-  },
-
-  {
-    title: "Pingpong",
-    address: "Erich Zeigner Allee",
-    date: "30:08.2024",
-    img: "../public/DolliBu-Wild-Elephant-Unicorn-Plush-Stuffed-Animal-Toy-Super-Soft-Elephantcorn-Dress-Up-Removable-Outfit-Cute-Fantasy-Wildlife-Gift-12-Inch_b81bd1b7-ab9c-47a4-b273-8899acf69d63.3a2eef36493668f5b4e5d133e2559c3b.webp",
-    creatorId: "234",
-  },
-
-  {
-    title: "Pingpong",
-    address: "Erich Zeigner Allee",
-    date: "31:08.2024",
-    img: "../public/DolliBu-Wild-Elephant-Unicorn-Plush-Stuffed-Animal-Toy-Super-Soft-Elephantcorn-Dress-Up-Removable-Outfit-Cute-Fantasy-Wildlife-Gift-12-Inch_b81bd1b7-ab9c-47a4-b273-8899acf69d63.3a2eef36493668f5b4e5d133e2559c3b.webp",
-    creatorId: "123",
-  },
-];
-
-type Meet = {
-  title: string;
-  address: string;
-  date: string;
-  img: string;
-  creatorId: string;
-  time: string;
-};
-//not used yet
-type DrawerUpComingSessionsProps = {
-  meets: Meet[];
-  userId: string;
-};
+type ExtendedMeet = AllMeet & { distance?: number };
 
 export function DrawerUpComingSessions({
   children,
   defaultTab,
+  meets,
+  user,
 }: {
   children: React.ReactNode;
   defaultTab: string;
+  meets: AllMeet[];
+  user: User;
 }) {
-  const filteredData = [...meets];
+  const [sortedMeets, setSortedMeets] = useState<ExtendedMeet[]>([]);
 
-  const renderCard = (item: Meet, key: number) => (
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        const { latitude, longitude } = position.coords;
+
+        const meetsWithDistance = meets.map((meet) => {
+          let meetLocation =
+            meet.location || (meet.venue && meet.venue.location);
+          let distance = Infinity;
+
+          if (meetLocation) {
+            distance = Math.sqrt(
+              Math.pow(latitude - meetLocation[0], 2) +
+                Math.pow(longitude - meetLocation[1], 2)
+            );
+          }
+
+          return {
+            ...meet,
+            distance: distance,
+          };
+        });
+
+        const sorted = meetsWithDistance.sort(
+          (a, b) => a.distance - b.distance
+        );
+        setSortedMeets(sorted);
+      });
+    }
+  }, [meets]);
+
+  const formatDate = (date: Date) => {
+    return new Date(date).toLocaleDateString("de-DE", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const renderCard = (item: ExtendedMeet, key: number) => (
     <Card key={key}>
       <CardHeader>
-        <CardTitle>{item.title}</CardTitle>
-        <CardDescription>{item.address}</CardDescription>
+        <CardTitle>{item.venue ? item.venue.name : "No Venue"}</CardTitle>
+        <CardDescription>{item.notes}</CardDescription>
       </CardHeader>
       <CardContent>
-        <p>Date: {item.date}</p>
-        {item.time && <p>Time: {item.time}</p>}
-        <img src={item.img} alt={item.title} />
+        <p>Date: {formatDate(item.date)}</p>
+        {item.time && <p>time: {item.time}</p>}
+        {/* {item.distance !== undefined && (
+          <p>
+            Entfernung:{" "}
+            {item.distance === Infinity
+              ? "Unbekannt"
+              : `${item.distance.toFixed(2)} km`}
+          </p>
+        )} */}
+        <p>
+          adress:{" "}
+          {item.venue && item.venue.address
+            ? item.venue.address
+            : "No adress available"}
+        </p>
       </CardContent>
     </Card>
   );
 
-  const nearMe = filteredData
-    .filter((item) => item.address === "Erich Zeigner Allee")
-    .map(renderCard);
+  const nearMe = sortedMeets.map(renderCard);
 
-  const ownMeets = filteredData
-    .filter((item) => item.creatorId === userId)
-    .map(renderCard);
+  const ownMeets = sortedMeets.filter((meet) =>
+    meet.participants.some((participant) => participant.id === user?.id)
+  );
 
   const renderEmptyState = (message: string) => <p>{message}</p>;
 
   const nearMeContent =
-    nearMe.length > 0 ? nearMe : renderEmptyState("No nearby events found.");
+    nearMe.length > 0
+      ? nearMe
+      : renderEmptyState("No venues found in the area");
+
   const ownMeetsContent =
     ownMeets.length > 0
-      ? ownMeets
-      : renderEmptyState("No events organized by you.");
+      ? ownMeets.map(renderCard)
+      : renderEmptyState("you are not participating in any meets");
 
   return (
     <Drawer>
       <DrawerTrigger>{children}</DrawerTrigger>
       <DrawerContent className="z-[9999] h-[calc(100vh-16vh)] flex flex-col">
         <DrawerHeader>
-          <DrawerTitle className="sr-only">Upcoming sessions</DrawerTitle>
+          <DrawerTitle className="sr-only">Upcoming meets</DrawerTitle>
           <DrawerDescription className="sr-only">
-            You can see the upcoming sessions here: the ones near you and the
-            ones you organized.
+            Hier sehen Sie die bevorstehenden Sitzungen: die in Ihrer Nähe und
+            die, die Sie organisiert haben.
           </DrawerDescription>
         </DrawerHeader>
         <Tabs
@@ -126,9 +144,11 @@ export function DrawerUpComingSessions({
             <TabsTrigger className="flex-1" value="near-me">
               Near me
             </TabsTrigger>
-            <TabsTrigger className="flex-1" value="own-meets">
-              Own meets
-            </TabsTrigger>
+            {user ? (
+              <TabsTrigger className="flex-1" value="own-meets">
+                Own meets
+              </TabsTrigger>
+            ) : null}
           </TabsList>
           <TabsContent
             value="near-me"
@@ -136,12 +156,14 @@ export function DrawerUpComingSessions({
           >
             {nearMeContent}
           </TabsContent>
-          <TabsContent
-            value="own-meets"
-            className="px-4 py-2 flex-1 overflow-y-scroll max-h-[350px]"
-          >
-            {ownMeetsContent}
-          </TabsContent>
+          {user ? (
+            <TabsContent
+              value="own-meets"
+              className="px-4 py-2 flex-1 overflow-y-scroll max-h-[350px]"
+            >
+              {ownMeetsContent}
+            </TabsContent>
+          ) : null}
         </Tabs>
       </DrawerContent>
     </Drawer>

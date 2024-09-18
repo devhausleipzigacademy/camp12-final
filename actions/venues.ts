@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { Tag } from "@prisma/client";
 
 export async function reportVenue(
   issue: string,
@@ -25,20 +26,26 @@ export async function reportVenue(
 
 export async function createVenue(
   name: string,
-  activities: string[],
+  activityTypes: string[],
   location: number[],
   image: string,
-  description?: string
+  description?: string,
+  tags?: string[],
+  address?: string
 ) {
   return prisma.venue.create({
     data: {
       name,
       activityTypes: {
-        connect: activities.map((activity) => ({ id: activity })),
+        connect: activityTypes.map((activity) => ({ id: activity })),
       },
       location,
       image,
       description,
+      tags: {
+        connect: tags?.length ? tags.map((tag) => ({ name: tag })) : [], // Ensure this matches TagWhereUniqueInput
+      },
+      address
     },
   });
 }

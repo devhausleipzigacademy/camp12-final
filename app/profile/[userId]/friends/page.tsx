@@ -4,6 +4,7 @@ import { FriendCard } from "@/components/friend-card";
 import { findFriends } from "@/actions/friends";
 import { validateRequest } from "@/lib/auth";
 import Link from "next/link";
+import { BackArrow } from "@/components/BackArrow";
 
 export default async function FriendsListPage({
   params,
@@ -15,25 +16,24 @@ export default async function FriendsListPage({
 
   if (!friends?.length)
     return (
-      <div className="flex flex-col items-center justify-center p-10 m-5 g-5">
-        <div className="mb-4 self-start">
-          <Link href="/profile/me">
-            <ArrowLeft className="w-6 h-6" />
-          </Link>
-        </div>
-        <p className="font-bold text-xl text-center">
-          No friends yet, add some friends by sharing your QR-Code:
-        </p>
-        <Link href={`/`} className="m-5 p-10">
-          <Button>Generate QR-Code</Button>
-        </Link>
-        <img
-          className="w-screen flex-1 object-cover object-left p-5 mt-10"
-          src="/signin-hero.jpg"
-          alt="Person sitting on a ping pong table"
-        />
-      </div>
-    );
+			<div className='flex flex-col items-center justify-center p-10 m-5 g-5'>
+				<BackArrow variant='link' />
+				<p className='font-bold text-xl text-center'>
+					No friends yet, add some friends by sharing your QR-Code:
+				</p>
+				<Link
+					href={`/`}
+					className='m-5 p-10'
+				>
+					<Button>Generate QR-Code</Button>
+				</Link>
+				<img
+					className='w-screen flex-1 object-cover object-left p-5 mt-10'
+					src='/signin-hero.jpg'
+					alt='Person sitting on a ping pong table'
+				/>
+			</div>
+		);
 
   return (
     <div className="max-w-md mx-auto bg-background text-foreground">

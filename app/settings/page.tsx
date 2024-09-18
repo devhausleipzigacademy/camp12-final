@@ -1,10 +1,11 @@
 import SettingsUser from "@/components/settingsUser";
 import { protectPage } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { error } from "console";
+import { cookies, headers } from "next/headers";
 
 const UserSettings = async () => {
   const user = await protectPage();
+
   try {
     const settings = await prisma.settings.findUniqueOrThrow({
       where: {

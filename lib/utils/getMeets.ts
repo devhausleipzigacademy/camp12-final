@@ -8,7 +8,6 @@ export async function getUserCreatedMeets(userId?: string) {
       venue: true,
       activityType: true,
       participants: true,
-      venue: true,
       creator: true,
     },
   });
@@ -27,7 +26,6 @@ export async function getUserParticipatingMeets(userId?: string) {
       venue: true,
       activityType: true,
       participants: true,
-      venue: true,
       creator: true,
     },
   });
@@ -37,3 +35,18 @@ export async function getUserParticipatingMeets(userId?: string) {
 export type UserParticipatingMeet = Awaited<
   ReturnType<typeof getUserParticipatingMeets>
 >[number];
+
+export async function getAllMeets() {
+  const meets = await prisma.meet.findMany({
+    include: {
+      venue: true,
+      activityType: true,
+      participants: true,
+    },
+  });
+  return meets;
+}
+
+export type AllMeet = Awaited<ReturnType<typeof getAllMeets>>[number];
+
+

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { fetchWeather } from "../lib/weather";
-import { fetchCityName } from "../lib/geoapify";
+import { fetchCityName } from "../lib/utils/fetchCity";
 
 interface Props {
   lat: number;
@@ -32,7 +32,7 @@ export default function DisplayWeather({ lat, lon }: Props) {
   console.log(weather);
 
   return (
-    <div className="p-4">
+    <div className="">
       {error && <p>Error: {error}</p>}
       {weather ? (
         <div>

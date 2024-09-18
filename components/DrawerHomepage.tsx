@@ -1,7 +1,5 @@
 import {
   Drawer,
-  DrawerPortal,
-  DrawerOverlay,
   DrawerContent,
   DrawerDescription,
   DrawerFooter,
@@ -9,7 +7,6 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Button } from "./ui/button";
 import { InteractionBar } from "./InteractionBar";
 import { VenueData } from "./Map"; // Import the type
 
@@ -36,7 +33,7 @@ export function DrawerHompage({ isOpen, setIsOpen, venueData }: DrawerProps) {
           </div>
         </DrawerHeader>
         <DrawerFooter>
-          <InteractionBar />
+          <InteractionBar venueData={venueData} />
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

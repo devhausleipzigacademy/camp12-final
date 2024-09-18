@@ -61,7 +61,7 @@ interface MeetProps {
   duration: number;
   isPublic: boolean;
   creatorId: string;
-  guests: number;
+  groupSize: number;
   notes?: string;
   venueId: string;
   activityTypeName: string;
@@ -73,7 +73,7 @@ export const createMeet = async ({
   duration,
   isPublic,
   creatorId,
-  guests,
+  groupSize,
   notes,
   venueId,
   activityTypeName,
@@ -99,7 +99,7 @@ export const createMeet = async ({
           name: activityTypeName,
         },
       },
-      guests: guests,
+      groupSize,
       notes: notes,
     },
   });
