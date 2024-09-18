@@ -1,11 +1,14 @@
 // pages/success.tsx
+"use client";
 import { useEffect } from "react";
-import { useRouter } from "next/router";
-import { protectPage } from "@/lib/auth";
+import { useRouter } from "next/navigation";
 
-export async function SuccessPage() {
+type Props = {
+	userId: String;
+};
+export function SuccessPage({ userId }: Props) {
 	const router = useRouter();
-	const userId = (await protectPage()).id; // Retrieve user's ID data from Lucia
+	// const userId = (await protectPage()).id; // Retrieve user's ID data from Lucia
 
 	// Redirect after 5 seconds
 	useEffect(() => {
