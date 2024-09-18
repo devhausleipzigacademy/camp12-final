@@ -12,11 +12,11 @@ export async function GET(req: NextRequest) {
         
     // Redirect to another page after adding a friend
     return new Response(null, {
-      status: 302,
-      headers: {
-        Location: `/profile/me`,
-      },
-    });  } catch (error) {
+			status: 302,
+			headers: {
+				Location: `/success`,
+			},
+		});  } catch (error) {
     return NextResponse.json({ error: 'Failed to add into friends list' }, { status: 500 });
   }
 }
