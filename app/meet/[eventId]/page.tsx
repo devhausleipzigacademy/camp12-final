@@ -1,7 +1,7 @@
 import { EditButton } from "@/components/EditButton";
 import { ShareInvite } from "@/components/ShareInvite";
 import { prisma } from "@/lib/db";
-import Back from "@/components/back";
+import Back from "@/components/Back";
 import { FaBasketball } from "react-icons/fa6";
 import { LuMapPin } from "react-icons/lu";
 import { LuCalendarDays } from "react-icons/lu";
@@ -14,18 +14,7 @@ import { FaBaby } from "react-icons/fa";
 import { FaTrophy } from "react-icons/fa6";
 import { FaTableTennisPaddleBall } from "react-icons/fa6";
 import { FaPersonWalking } from "react-icons/fa6";
-
-const responseId = "123";
-const userId = "234";
-const creatorId = "234";
-const isPublic = false;
-const friendsImages = [
-  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=2864&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://images.unsplash.com/photo-1514626585111-9aa86183ac98?q=80&w=2787&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-];
+import { format } from "date-fns";
 
 export default async function MeetDetail({
   params,
@@ -34,7 +23,13 @@ export default async function MeetDetail({
 }) {
   const meet = await prisma.meet.findUnique({
     where: { id: params.eventId },
-    include: { participants: true },
+    include: {
+      participants: true,
+      creator: true,
+      venue: true,
+      activityType: true,
+      tags: true,
+    },
   });
 
   if (!meet) {
@@ -42,14 +37,26 @@ export default async function MeetDetail({
   }
 
   const { eventId } = params;
+
+  // Helper function to get icon based on activity type
+  const getActivityIcon = (activityType: string) => {
+    switch (activityType.toLowerCase()) {
+      case "basketball":
+        return <FaBasketball className="size-6 fill-orange" />;
+      // Add more cases for other activity types
+      default:
+        return <FaBasketball className="size-6 fill-orange" />;
+    }
+  };
+
   return (
     <div className="h-screen flex flex-col items-center bg-white relative">
       <Back />
       <ShareInvite
-        responseId={responseId}
-        userId={userId}
-        creatorId={creatorId}
-        isPublic={isPublic}
+        responseId={meet.id}
+        userId={meet.creatorId}
+        creatorId={meet.creatorId}
+        isPublic={meet.isPublic}
       />
       <img
         className="w-screen object-cover h-2/5"
@@ -63,30 +70,33 @@ export default async function MeetDetail({
         <section className="absolute, ">
           <div className="flex flex-col gap-4 px-5">
             <div className="flex gap-2">
-              <FaBasketball className="size-6 fill-orange" />
-              <p className="font-medium">Basketball</p>
+              {getActivityIcon(meet.activityType.name)}
+              <p className="font-medium">{meet.activityType.name}</p>
             </div>
-            <div className="flex  justify-between">
-              <h1 className="text-xl font-semibold">Ping Pong Palooza</h1>
-              <EditButton userId={userId} creatorId={creatorId} />
+            <div className="flex justify-between">
+              <h1 className="text-xl font-semibold">
+                {meet.activityType.name} Meet
+              </h1>
+              <EditButton userId={meet.creatorId} creatorId={meet.creatorId} />
             </div>
             <div className="flex gap-1">
               <LuMapPin className="size-5 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
-                Knochenpark, Leipzig
+                {meet.venue ? meet.venue.name : meet.address}, {meet.address}
               </p>
             </div>
             <div className="flex gap-1">
               <LuCalendarDays className="size-5 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
-                Thu 05 Sep 2024 - 18:00 (every 2 weeks)
+                {format(new Date(meet.date), "EEE dd MMM yyyy")} - {meet.time}
+                {meet.isRecurring ? " (recurring)" : ""}
               </p>
             </div>
           </div>
           <Separator className="my-5 w-full" />
           <div className="flex justify-between w-full items-center px-5 mb-5">
             <div className="flex">
-              {friendsImages.map((url, index) => (
+              {/* {friendsImages.map((url, index) => (
                 <Avatar
                   key={index}
                   className={`w-10 h-10 overflow-hidden relative ring-2 ring-white ${
@@ -99,7 +109,7 @@ export default async function MeetDetail({
                     className="w-full h-full object-cover"
                   />
                 </Avatar>
-              ))}
+              ))} */}
               <Avatar className="h-10 w-10 -ml-2 ring-2 ring-white">
                 <AvatarImage src="/placeholder-user.jpg" alt="@shadcn" />
                 <AvatarFallback>+15</AvatarFallback>

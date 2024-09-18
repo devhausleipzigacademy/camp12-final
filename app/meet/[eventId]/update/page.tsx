@@ -1,4 +1,4 @@
-import MeetForm from "@/app/create/meet";
+import MeetForm from "@/app/create-meet/page";
 import { prisma } from "@/lib/db";
 
 export default async function UpdateMeetPage({
