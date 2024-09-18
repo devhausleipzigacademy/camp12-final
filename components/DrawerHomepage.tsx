@@ -24,11 +24,11 @@ export function DrawerHompage({ isOpen, setIsOpen, venueData }: DrawerProps) {
         <DrawerHeader>
           <DrawerTitle>{venueData?.name || "Venue Information"}</DrawerTitle>
           <DrawerDescription>
-            {venueData?.address || "No address available"}
+            {venueData?.address || "No Address Available"}
           </DrawerDescription>
           <div className="relative m-auto mb-5">
             <p className="text-sm text-slate-700">
-              Distance: {venueData?.distance || "Unknown distance"}
+              Distance: {venueData?.distance || "Unknown Distance"}
             </p>
           </div>
         </DrawerHeader>

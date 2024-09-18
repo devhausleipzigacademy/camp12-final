@@ -139,12 +139,12 @@ export default function Map2({
           const marker = L.marker(meet.location as L.LatLngTuple, {
             icon: meetIcon,
           })
-            .bindPopup("Meet: " + meet.activityType.name)
+            .bindPopup("Session: " + meet.activityType.name)
             .on("click", () => {
               const venueData: VenueData = {
                 id: meet.venueId,
-                name: meet.activityType.name || "Unnamed Meet",
-                address: meet.address || "Unknown address",
+                name: meet.activityType.name || "Unnamed Session",
+                address: meet.address || "Unknown Adress",
                 geolocation: meet.location as LatLngExpression,
               };
               openDrawer(venueData);
